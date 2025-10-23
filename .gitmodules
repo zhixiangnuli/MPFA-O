@@ -1,0 +1,6 @@
+[submodule "thirdparty/mdspan"]
+	path = thirdparty/mdspan
+	url = https://github.com/kokkos/mdspan.git
+[submodule "thirdparty/eigen3"]
+	path = thirdparty/eigen3
+	url = https://gitlab.com/libeigen/eigen.git

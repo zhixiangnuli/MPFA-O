@@ -1,6 +1,13 @@
 # Prerequisites
 *.d
 
+# Build directory
+build/
+
+# Third party libraries
+thirdparty/*
+!thirdparty/.gitkeep
+
 # Compiled Object files
 *.slo
 *.lo
