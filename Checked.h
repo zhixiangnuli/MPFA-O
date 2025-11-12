@@ -30,8 +30,8 @@ constexpr double Plow = 0.0, Phigh = 1.0;
 constexpr double epsilonP = 1.0e-6, residual = 0.0001;
 // constexpr double pem0 = 300.0;
 // constexpr double tolpem = pem0 + 1.0;
-constexpr int nxx = 3, nyy = 3, nzz = 3; // Ï¸·ÖÇ°
-// constexpr int nxx = 10, nyy = 9, nzz = 8;                          //Ï¸·ÖÇ°
+constexpr int nxx = 3, nyy = 3, nzz = 3; // Ï¸ï¿½ï¿½Ç°
+// constexpr int nxx = 10, nyy = 9, nzz = 8;                          //Ï¸ï¿½ï¿½Ç°
 
 enum class Axis // Determine the positive or negative of a certain coordinate value of the
                 // direction vector
@@ -179,7 +179,7 @@ double _get_distance(const double *c, const double *p1, const double *p2)
     return std::sin(std::acos(_dot_product(v1, v2) / l)) * l;
 }
 
-void _multcross(const double *x, const double *y, double *z) // ²æ³Ë
+void _multcross(const double *x, const double *y, double *z) // ï¿½ï¿½ï¿½
 {
     z[0] = x[1] * y[2] - x[2] * y[1];
     z[1] = x[2] * y[0] - x[0] * y[2];
@@ -299,7 +299,7 @@ void _transform(Ktensor *K, int n)
 
 double _assit_divied(const double *a, int i, int j, int k, int divn)
 {
-    double id = 1.0 * i, jd = 1.0 * j, kd = 1.0 * k, divnd = 1.0 * divn; // ×ª»¯³Édouble
+    double id = 1.0 * i, jd = 1.0 * j, kd = 1.0 * k, divnd = 1.0 * divn; // ×ªï¿½ï¿½ï¿½ï¿½double
     double verts1 = a[0] + (id / divnd) * (a[1] - a[0]);
     double verts2 = a[2] + (id / divnd) * (a[3] - a[2]);
     double verts12 = verts1 + (jd / divnd) * (verts2 - verts1);
@@ -321,7 +321,7 @@ void _get_divide(const double *verts0, double *verts, const Ktensor *perm0, Kten
             for (int i = 0; i < nxx; i++)
             {
                 int n0 = k * nxx * nyy + j * nxx + i;
-                // Ï¸·ÖÏÂµ±Ç°Íø¸ñĞÅÏ¢
+                // Ï¸ï¿½ï¿½ï¿½Âµï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
                 int k0 = divn * k;
                 int j0 = divn * j;
                 int i0 = divn * i;
@@ -379,7 +379,7 @@ void _get_divide(const double *verts0, double *verts, const Ktensor *perm0, Kten
     }
 }
 
-// 3x3x3 ÆåÅÌ¸ñ
+// 3x3x3 ï¿½ï¿½ï¿½Ì¸ï¿½
 void _get_3x3(double *_verts, Ktensor *pem, double pemx,
               double pemy, double pemz, double pemxy, double pemyz, double pemxz, int Lamda)
 {
@@ -489,7 +489,7 @@ void _get_3x3(double *_verts, Ktensor *pem, double pemx,
     // double DX = 1.0;
     // double DY = 1.0;
     // double DZ = 1.0;
-    // for (int k = 0; k < nzz; ++k) //µÑ¿¨¶ûÍø¸ñ
+    // for (int k = 0; k < nzz; ++k) //ï¿½Ñ¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     //{
     //     for (int j = 0; j < nyy; ++j)
     //     {
@@ -667,4 +667,48 @@ void _Outputvtk(const double *verts, const double *perm)
     }
 
     outputFile.close();
+}
+// æ±‚å–4ä¸ªç‚¹æ„æˆæ›²é¢çš„æ³•å‘é‡ 1->2->3->4æ„æˆç¯
+void _get_surface_normal(const double *p1, const double *p2, const double *p3, const double *p4, double *n, const enum Axis axi)
+{
+    double v1[3], v2[3], v3[3];
+    _vectorize(p1, p2, v1);
+    _vectorize(p1, p3, v2);
+    _vectorize(p1, p4, v3);
+
+    double n1[3], n2[3];
+    _cross_product(v1, v2, n1);
+    _cross_product(v2, v3, n2);
+
+    for (int i = 0; i < 3; ++i)
+    {
+        n[i] = (n1[i] + n2[i]) / 2.0;
+    }
+    switch (axi)
+    {
+    case Axis::XPOSITIVE:
+        if (n[0] < 0)
+            _get_reverse(n);
+        break;
+    case Axis::XNEGATIVE:
+        if (n[0] > 0)
+            _get_reverse(n);
+        break;
+    case Axis::YPOSITIVE:
+        if (n[1] < 0)
+            _get_reverse(n);
+        break;
+    case Axis::YNEGATIVE:
+        if (n[1] > 0)
+            _get_reverse(n);
+        break;
+    case Axis::ZPOSITIVE:
+        if (n[2] < 0)
+            _get_reverse(n);
+        break;
+    case Axis::ZNEGATIVE:
+        if (n[2] > 0)
+            _get_reverse(n);
+        break;
+    }
 }

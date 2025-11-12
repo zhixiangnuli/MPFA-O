@@ -33,12 +33,12 @@ int main(int argc, char *argv[])
     for (int divn = 1; divn < 8; divn++)
     {
         std::fprintf(fp, "1.1\n");
-        pemx = 10.0;
-        pemy = 20.0;
-        pemz = 20.0;
-        pemxy = 2.0;
-        pemyz = 2.0;
-        pemxz = 2.0;
+        // pemx = 10.0;
+        // pemy = 20.0;
+        // pemz = 20.0;
+        // pemxy = 2.0;
+        // pemyz = 2.0;
+        // pemxz = 2.0;
         Lamda = 10;
         _get_3x3(_verts, pem, pemx, pemy, pemz, pemxy, pemyz, pemxz, Lamda);
         _Outputvtk(_verts, (double *)pem);

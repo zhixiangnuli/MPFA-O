@@ -2,7 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 /*
  *
- *  ¶ÔÓÚ²»Ê¹ÓÃµ÷ºÍÆ½¾ùµÄ²¿·Ö£¬ºöÂÔ·ÖÁ¿£¬´Ë´¦»á²úÉúÒ»¶¨Á¿µÄ½á¹ûÆ«ÒÆ
+ *  ï¿½ï¿½ï¿½Ú²ï¿½Ê¹ï¿½Ãµï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½Ä²ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½Æ«ï¿½ï¿½
  *
  */
 
@@ -122,16 +122,16 @@ void _get_vec(int i, int j, int k, const Ktensor *perm,
     int nz = nzz * divn;
     std::mdspan<const double, std::extents<size_t, -1, -1, -1, 8, 3>> _verts(verts, nz, ny, nx);
 
-    double c[8][3];      // 8¸öÍø¸ñÖÐÐÄµã×ø±ê
-    double p[12][3];     // 12¸öÁ¬Ðøµã×ø±ê
-    double n[12][3];     // 12¸öÁ¬Ðøµã¶ÔÓ¦Íø¸ñ½»½ÓÃæµÄ·¨ÏòÁ¿
-    double pp[6][3];     // 12¸ö½»½ÓÃæÓë×ø±êÖáµÄ6¸ö½»µã
-    double S[12];        // 12¸ö½»½ÓÃæÃæ»ý
-    double w[12][3];     // 12¸ö½»½ÓÃæ¹¹³É·½³ÌµÄ×ó±ß¸÷ÏîÏµÊý
-    double w_rvs[12][3]; // 12¸ö½»½ÓÃæ¹¹³É·½³ÌµÄÓÒ±ß¸÷ÏîÏµÊý
-    int idx_c[8][3];     // 8¸öÍø¸ñ¶ÔÓ¦µÄÍø¸ñ¿ØÖÆÇøÓòµÄÈý¸öp[i][3]Á¬Ðøµã±àºÅi
-    int idx_w[12];       // 12¸ö½»½ÓÃæ¹¹³É·½³ÌµÄ×ó±ßµÄc[i][3]Íø¸ñ±àºÅi
-    int idx_w_rvs[12];   // 12¸ö½»½ÓÃæ¹¹³É·½³ÌµÄÓÒ±ßµÄc[i][3]Íø¸ñ±àºÅi
+    double c[8][3];      // 8ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½
+    double p[12][3];     // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    double n[12][3];     // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ñ½»½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½
+    double pp[6][3];     // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½6ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    double S[12];        // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    double w[12][3];     // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ¹¹ï¿½É·ï¿½ï¿½Ìµï¿½ï¿½ï¿½ß¸ï¿½ï¿½ï¿½Ïµï¿½ï¿½
+    double w_rvs[12][3]; // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ¹¹ï¿½É·ï¿½ï¿½Ìµï¿½ï¿½Ò±ß¸ï¿½ï¿½ï¿½Ïµï¿½ï¿½
+    int idx_c[8][3];     // 8ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½p[i][3]ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½i
+    int idx_w[12];       // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ¹¹ï¿½É·ï¿½ï¿½Ìµï¿½ï¿½ï¿½ßµï¿½c[i][3]ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½i
+    int idx_w_rvs[12];   // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ¹¹ï¿½É·ï¿½ï¿½Ìµï¿½ï¿½Ò±ßµï¿½c[i][3]ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½i
 
     int i0 = k * nx * ny + j * nx + i;
     int i1 = i0 + nx;
@@ -181,7 +181,7 @@ void _get_vec(int i, int j, int k, const Ktensor *perm,
     S[10] = 2 * _get_area(pp[0], pp[3], p[10]);
     S[11] = 2 * _get_area(pp[0], pp[1], p[11]);
 
-    // Á÷ÈëµÄÁ÷Á¿ÎªÕý
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½
     _get_plane_n(Axis::XPOSITIVE, pp[2], pp[5], p[0], n[0]);
     _get_plane_n(Axis::XPOSITIVE, pp[0], pp[5], p[1], n[1]);
     _get_plane_n(Axis::XPOSITIVE, pp[0], pp[4], p[2], n[2]);
@@ -227,7 +227,7 @@ void _get_vec(int i, int j, int k, const Ktensor *perm,
     idx_cell[7] = (k + 1) * nx * ny + (j + 1) * nx + i;
     idx_c[7][0] = 0;
     idx_c[7][1] = 7;
-    idx_c[7][2] = 9; // 8¸öÍø¸ñµÄ¼¯ºÏ
+    idx_c[7][2] = 9; // 8ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
 
     idx_w[0] = 6;
     idx_w_rvs[0] = 7;
@@ -254,7 +254,7 @@ void _get_vec(int i, int j, int k, const Ktensor *perm,
     idx_w[10] = 4;
     idx_w_rvs[10] = 0;
     idx_w[11] = 5;
-    idx_w_rvs[11] = 1; // 12¸öÃæÁ½±ßÍø¸ñµÄÐòºÅ
+    idx_w_rvs[11] = 1; // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     for (int l = 0; l < 12; l++)
     {
@@ -270,9 +270,9 @@ void _get_vec(int i, int j, int k, const Ktensor *perm,
     Eigen::Matrix<double, 12, 8, Eigen::RowMajor> matT;
 
     for (int l = 0; l < 12; l++)
-    { // 12¸öÃæµÄÁ÷Á¿
+    { // 12ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         for (int m = 0; m < 12; m++)
-        { // 12¸öµã
+        { // 12ï¿½ï¿½ï¿½ï¿½
             matA(l, m) = 0.0;
             for (int n = 0; n < 3; n++)
             {
@@ -775,13 +775,371 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
         }
     }
 
-    int *actnum = new int[nx * ny * nz];
-    std::fill(actnum, actnum + nx * ny * nz, 1);
+    // int *actnum = new int[nx * ny * nz];
+    // std::fill(actnum, actnum + nx * ny * nz, 1);
 
     //_get_tran(nx, ny, nz, actnum, pem1, _verts1, cx, cy, cz, tranx, trany, tranz);
 
     double epsilonP = 1.0e-6, residual = 0.0001;
+    n = 0;
+    nnz = 0;
+    Ptr[0] = 0;
+    for (int k = 0; k < nz; k++)
+    {
+        for (int j = 0; j < ny; j++)
+        {
+            for (int i = 0; i < nx; i++)
+            {
+                count = 0;
+                for (int z = -1; z <= 1; ++z)
+                    for (int y = -1; y <= 1; ++y)
+                        for (int x = -1; x <= 1; ++x)
+                        {
+                            int ii = k + z;
+                            int jj = j + y;
+                            int ii_ = i + x;
+                            if (ii >= 0 && ii < nz && jj >= 0 && jj < ny && ii_ >= 0 && ii_ < nx)
+                            {
+                                Idx[nnz] = ii * nx * ny + jj * nx + ii_;
+                                nnz++;
+                                count++;
+                            }
+                        }
+                Ptr[n + 1] = Ptr[n] + count;
+                ++n;
+            }
+        }
+    }
+    auto A = [&](int n, int m) -> double &
+    {
+        for (int idx = Ptr[n]; idx < Ptr[n + 1]; ++idx)
+        {
+            if (Idx[idx] == m)
+            {
+                return Val[idx];
+            }
+        }
+        assert(false);
+        static double zero = 0.0;
+        return zero;
+    };
+    double pb = 0.0;
+    for (k = 0; k <= nz; k++)
+        for (j = 0; j <= ny; j++)
+            for (i = 0; i <= nx; i++)
+            {
+                int cur = k * nx * ny + j * nx + i;
+                // è¾¹ç•Œç½‘æ ¼çš„è¾¹ç•ŒåŽ‹åŠ›
 
+                if (i == 0)
+                {
+                    pb = Plow;
+                }
+                else if (i == nx)
+                {
+                    pb = Phigh;
+                }
+                // 3ä¸ªé¢çš„ç‚¹ï¼Œ2ä¸ªæœªçŸ¥æ•°,8ä¸ªç‚¹
+                if (i == 0 && j == 0 && k == 0)
+                {
+                    // 0,4,8,äº¤æŽ¥é¢ä¸­ç‚¹ä¸‹æ ‡
+                    double p0[3];
+                    double p4[3];
+                    double p8[3];
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 6, 0), p0);
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 5, 0), p4);
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 3, 0), p8);
+                    // 1,2,5,äº¤æŽ¥è¾¹ç‚¹ä¸‹æ ‡
+                    double pp1[3];
+                    double pp2[3];
+                    double pp5[3];
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), pp1);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), pp2);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 4, 0), pp5);
+                    double n0[3];
+                    double n4[3];
+                    double n8[3];
+                    double n48[3];
+                    // é€šè¿‡ä¸¤ä¸ªç»çƒ­é¢çš„æµé‡ä¸º0,æµé‡çš„æ–¹å‘å¯æ ¹æ®å…¶æ³•å‘é‡ç¡®å®š
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp2, p0, pp5, n0, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp1, p4, pp5, n4, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp1, p8, pp2, n8, Axis::ZPOSITIVE);
+                    _cross_product(n4, n8, n48);
+                    Eigen::Matrix3d matK;
+                    _get_matK(pem1[cur], matK);
+                    Eigen::RowVector3d Dx;
+                    Eigen::Vector3d Dn;
+                    Dx << p0[0] - _cx(k, j, i), p0[1] - _cy(k, j, i), p0[2] - _cz(k, j, i);
+                    Dn << n48[0], n48[1], n48[2];
+                    double cA = Dx * matK.inverse() * Dn;
+                    cA = _dot_product(n0, n48) / cA;
+                    B[cur] += pb * cA;
+                    A(cur, cur) += cA;
+                }
+                else if (i == 0 && j == ny && k == 0)
+                {
+                    cur -= nx;
+                    // 1,4,11äº¤æŽ¥é¢ä¸­ç‚¹ä¸‹æ ‡
+                    double p1[3];
+                    double p4[3];
+                    double p11[3];
+                    _get_centroid(&verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), &verts1(k, j - 1, i, 6, 0), &verts1(k, j - 1, i, 7, 0), p4);
+                    _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 4, 0), &verts1(k, j - 1, i, 6, 0), p1);
+                    _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 1, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), p11);
+                    // 0,1,5,äº¤æŽ¥è¾¹ç‚¹ä¸‹æ ‡
+                    double pp0[3];
+                    double pp1[3];
+                    double pp5[3];
+                    _get_midpoint(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 2, 0), pp0);
+                    _get_midpoint(&verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), pp1);
+                    _get_midpoint(&verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 6, 0), pp5);
+                    double n1[3];
+                    double n4[3];
+                    double n11[3];
+                    double n411[3];
+                    // é€šè¿‡ä¸¤ä¸ªç»çƒ­é¢çš„æµé‡ä¸º0,æµé‡çš„æ–¹å‘å¯æ ¹æ®å…¶æ³•å‘é‡ç¡®å®š
+                    _get_surface_normal(&verts1(k, j - 1, i, 2, 0), pp0, p1, pp5, n1, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i, 2, 0), pp1, p4, pp5, n4, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i, 2, 0), pp1, p11, pp0, n11, Axis::ZPOSITIVE);
+                    _cross_product(n4, n11, n411);
+                    Eigen::Matrix3d matK;
+                    _get_matK(pem1[cur], matK);
+                    Eigen::RowVector3d Dx;
+                    Eigen::Vector3d Dn;
+                    Dx << p1[0] - _cx(k, j - 1, i), p1[1] - _cy(k, j - 1, i), p1[2] - _cz(k, j - 1, i);
+                    Dn << n411[0], n411[1], n411[2];
+                    double cA = Dx * matK.inverse() * Dn;
+                    cA = _dot_product(n1, n411) / cA;
+                    B[cur] += pb * cA;
+                    A(cur, cur) += cA;
+                }
+                else if (i == 0 && j == 0 && k == nz)
+                {
+                    cur -= nx * ny;
+                    // 3,5,8äº¤æŽ¥é¢ä¸­ç‚¹ä¸‹æ ‡
+                    double p3[3];
+                    double p5[3];
+                    double p8[3];
+                    _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 2, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), p3);
+                    _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 1, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), p5);
+                    _get_centroid(&verts1(k - 1, j, 4, 0, 0), &verts1(k - 1, j, i, 5, 0), &verts1(k - 1, j, i, 6, 0), &verts1(k - 1, j, i, 7, 0), p8);
+                    // 1,2,4äº¤æŽ¥è¾¹ç‚¹ä¸‹æ ‡
+                    double pp1[3];
+                    double pp2[3];
+                    double pp4[3];
+                    _get_midpoint(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), pp1);
+                    _get_midpoint(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), pp2);
+                    _get_midpoint(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 4, 0), pp4);
+                    double n3[3];
+                    double n5[3];
+                    double n8[3];
+                    double n58[3];
+                    // é€šè¿‡ä¸¤ä¸ªç»çƒ­é¢çš„æµé‡ä¸º0,æµé‡çš„æ–¹å‘å¯æ ¹æ®å…¶æ³•å‘é‡ç¡®å®š
+                    _get_surface_normal(&verts1(k - 1, j, i, 4, 0), pp4, p3, pp2, n3, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i, 4, 0), pp1, p5, pp4, n5, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i, 4, 0), pp1, p8, pp2, n8, Axis::ZPOSITIVE);
+                    _cross_product(n5, n8, n58);
+                    Eigen::Matrix3d matK;
+                    _get_matK(pem1[cur], matK);
+                    Eigen::RowVector3d Dx;
+                    Eigen::Vector3d Dn;
+                    Dx << p3[0] - _cx(k - 1, j, i), p3[1] - _cy(k - 1, j, i), p3[2] - _cz(k - 1, j, i);
+                    Dn << n58[0], n58[1], n58[2];
+                    double cA = Dx * matK.inverse() * Dn;
+                    cA = _dot_product(n3, n58) / cA;
+                    B[cur] += pb * cA;
+                    A(cur, cur) += cA;
+                }
+                else if (i == 0 && j == ny && k == nz)
+                {
+                    cur -= nx * ny + nx;
+                    // 2,5,11äº¤æŽ¥é¢ä¸­ç‚¹ä¸‹æ ‡
+                    double p2[3];
+                    double p5[3];
+                    double p11[3];
+                    _get_centroid(&verts1(k - 1, j - 1, i, 0, 0), &verts1(k - 1, j - 1, i, 2, 0), &verts1(k - 1, j - 1, i, 4, 0), &verts1(k - 1, j - 1, i, 6, 0), p2);
+                    _get_centroid(&verts1(k - 1, j - 1, i, 2, 0), &verts1(k - 1, j - 1, i, 3, 0), &verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 7, 0), p5);
+                    _get_centroid(&verts1(k - 1, j - 1, i, 4, 0), &verts1(k - 1, j - 1, i, 5, 0), &verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 7, 0), p11);
+                    // 0,1,4äº¤æŽ¥è¾¹ç‚¹ä¸‹æ ‡
+                    double pp0[3];
+                    double pp1[3];
+                    double pp4[3];
+                    _get_midpoint(&verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 4, 0), pp0);
+                    _get_midpoint(&verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 7, 0), pp1);
+                    _get_midpoint(&verts1(k - 1, j - 1, i, 2, 0), &verts1(k - 1, j - 1, i, 6, 0), pp4);
+                    double n2[3];
+                    double n5[3];
+                    double n11[3];
+                    double n511[3];
+                    // é€šè¿‡ä¸¤ä¸ªç»çƒ­é¢çš„æµé‡ä¸º0,æµé‡çš„æ–¹å‘å¯æ ¹æ®å…¶æ³•å‘é‡ç¡®å®š
+                    _get_surface_normal(&verts1(k - 1, j - 1, i, 6, 0), pp0, p2, pp4, n2, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i, 6, 0), pp1, p5, pp4, n5, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i, 6, 0), pp1, p11, pp0, n11, Axis::ZPOSITIVE);
+                    _cross_product(n5, n11, n511);
+                    Eigen::Matrix3d matK;
+                    _get_matK(pem1[cur], matK);
+                    Eigen::RowVector3d Dx;
+                    Eigen::Vector3d Dn;
+                    Dx << p2[0] - _cx(k - 1, j - 1, i), p2[1] - _cy(k - 1, j - 1, i), p2[2] - _cz(k - 1, j - 1, i);
+                    Dn << n511[0], n511[1], n511[2];
+                    double cA = Dx * matK.inverse() * Dn;
+                    cA = _dot_product(n2, n511) / cA;
+                    B[cur] += pb * cA;
+                    A(cur, cur) += cA;
+                }
+                else if (i == nx && j == 0 && k == 0)
+                {
+                    cur -= 1;
+                    // 0,7,9äº¤æŽ¥é¢ä¸­ç‚¹ä¸‹æ ‡
+                    double p0[3];
+                    double p7[3];
+                    double p9[3];
+                    _get_centroid(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 3, 0), &verts1(k, j, i - 1, 5, 0), &verts1(k, j, i - 1, 7, 0), p0);
+                    _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 4, 0), &verts1(k, j, i - 1, 5, 0), p7);
+                    _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 2, 0), &verts1(k, j, i - 1, 3, 0), p9);
+                    // 2,3,5äº¤æŽ¥è¾¹ç‚¹ä¸‹æ ‡
+                    double pp2[3];
+                    double pp3[3];
+                    double pp5[3];
+                    _get_midpoint(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 3, 0), pp2);
+                    _get_midpoint(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), pp3);
+                    _get_midpoint(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 5, 0), pp5);
+                    double n0[3];
+                    double n7[3];
+                    double n9[3];
+                    double n79[3];
+                    // é€šè¿‡ä¸¤ä¸ªç»çƒ­é¢çš„æµé‡ä¸º0,æµé‡çš„æ–¹å‘å¯æ ¹æ®å…¶æ³•å‘é‡ç¡®å®š
+                    _get_surface_normal(&verts1(k, j, i - 1, 1, 0), pp2, p0, pp5, n0, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i - 1, 1, 0), pp3, p7, pp5, n7, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i - 1, 1, 0), pp3, p9, pp2, n9, Axis::ZPOSITIVE);
+                    _cross_product(n7, n9, n79);
+                    Eigen::Matrix3d matK;
+                    _get_matK(pem1[cur], matK);
+                    Eigen::RowVector3d Dx;
+                    Eigen::Vector3d Dn;
+                    Dx << p0[0] - _cx(k, j, i - 1), p0[1] - _cy(k, j, i - 1), p0[2] - _cz(k, j, i - 1);
+                    Dn << n79[0], n79[1], n79[2];
+                    double cA = Dx * matK.inverse() * Dn;
+                    cA = _dot_product(n0, n79) / cA;
+                    B[cur] -= pb * cA;
+                    A(cur, cur) -= cA;
+                }
+                else if (i = nx && j == ny && k == 0)
+                {
+                    cur -= nx + 1;
+                    // 1,7,10äº¤æŽ¥é¢ä¸­ç‚¹ä¸‹æ ‡
+                    double p1[3];
+                    double p7[3];
+                    double p10[3];
+                    _get_centroid(&verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 6, 0), &verts1(k, j - 1, i - 1, 7, 0), p7);
+                    _get_centroid(&verts1(k, j - 1, i - 1, 1, 0), &verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 5, 0), &verts1(k, j - 1, i - 1, 7, 0), p1);
+                    _get_centroid(&verts1(k, j - 1, i - 1, 1, 0), &verts1(k, j - 1, i - 1, 0, 0), &verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), p10);
+                    // 0,3,5äº¤æŽ¥è¾¹ç‚¹ä¸‹æ ‡
+                    double pp0[3];
+                    double pp3[3];
+                    double pp5[3];
+                    _get_midpoint(&verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 1, 0), pp0);
+                    _get_midpoint(&verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), pp3);
+                    _get_midpoint(&verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 7, 0), pp5);
+                    double n1[3];
+                    double n7[3];
+                    double n10[3];
+                    double n710[3];
+                    // é€šè¿‡ä¸¤ä¸ªç»çƒ­é¢çš„æµé‡ä¸º0,æµé‡çš„æ–¹å‘å¯æ ¹æ®å…¶æ³•å‘é‡ç¡®å®š
+                    _get_surface_normal(&verts1(k, j - 1, i - 1, 3, 0), pp0, p1, pp5, n1, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i - 1, 3, 0), pp3, p7, pp5, n7, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i - 1, 3, 0), pp3, p10, pp0, n10, Axis::ZPOSITIVE);
+                    _cross_product(n7, n10, n710);
+                    Eigen::Matrix3d matK;
+                    _get_matK(pem1[cur], matK);
+                    Eigen::RowVector3d Dx;
+                    Eigen::Vector3d Dn;
+                    Dx << p1[0] - _cx(k, j - 1, i - 1), p1[1] - _cy(k, j - 1, i - 1), p1[2] - _cz(k, j - 1, i - 1);
+                    Dn << n710[0], n710[1], n710[2];
+                    double cA = Dx * matK.inverse() * Dn;
+                    cA = _dot_product(n1, n710) / cA;
+                    B[cur] -= pb * cA;
+                    A(cur, cur) -= cA;
+                }
+                else if (i == nx && j == 0 && k == nz)
+                {
+                    cur -= nx * ny + 1;
+                    // 3,6,9äº¤æŽ¥é¢ä¸­ç‚¹ä¸‹æ ‡
+                    double p3[3];
+                    double p6[3];
+                    double p9[3];
+                    _get_centroid(&verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 3, 0), &verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 7, 0), p3);
+                    _get_centroid(&verts1(k - 1, j, i - 1, 0, 0), &verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), p6);
+                    _get_centroid(&verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 6, 0), &verts1(k - 1, j, i - 1, 7, 0), p9);
+                    // 2,3,4äº¤æŽ¥è¾¹ç‚¹ä¸‹æ ‡
+                    double pp2[3];
+                    double pp3[3];
+                    double pp4[3];
+                    _get_midpoint(&verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 7, 0), pp2);
+                    _get_midpoint(&verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 4, 0), pp3);
+                    _get_midpoint(&verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 1, 0), pp4);
+                    double n3[3];
+                    double n6[3];
+                    double n9[3];
+                    double n69[3];
+                    // é€šè¿‡ä¸¤ä¸ªç»çƒ­é¢çš„æµé‡ä¸º0,æµé‡çš„æ–¹å‘å¯æ ¹æ®å…¶æ³•å‘é‡ç¡®å®š
+                    _get_surface_normal(&verts1(k - 1, j, i - 1, 5, 0), pp4, p3, pp2, n3, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i - 1, 5, 0), pp3, p6, pp4, n6, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i - 1, 5, 0), pp3, p9, pp2, n9, Axis::ZPOSITIVE);
+                    _cross_product(n6, n9, n69);
+                    Eigen::Matrix3d matK;
+                    _get_matK(pem1[cur], matK);
+                    Eigen::RowVector3d Dx;
+                    Eigen::Vector3d Dn;
+                    Dx << p3[0] - _cx(k - 1, j, i - 1), p3[1] - _cy(k - 1, j, i - 1), p3[2] - _cz(k - 1, j, i - 1);
+                    Dn << n69[0], n69[1], n69[2];
+                    double cA = Dx * matK.inverse() * Dn;
+                    cA = _dot_product(n3, n69) / cA;
+                    B[cur] -= pb * cA;
+                    A(cur, cur) -= cA;
+                }
+                else if (i == nx && j == ny && k == nz)
+                {
+                    cur -= nx * ny + nx + 1;
+                    // 2,6,10äº¤æŽ¥é¢ä¸­ç‚¹ä¸‹æ ‡
+                    double p2[3];
+                    double p6[3];
+                    double p10[3];
+                    _get_centroid(&verts1(k - 1, j - 1, i - 1, 1, 0), &verts1(k - 1, j - 1, i - 1, 3, 0), &verts1(k - 1, j - 1, i - 1, 5, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), p2);
+                    _get_centroid(&verts1(k - 1, j - 1, i - 1, 2, 0), &verts1(k - 1, j - 1, i - 1, 3, 0), &verts1(k - 1, j - 1, i - 1, 6, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), p6);
+                    _get_centroid(&verts1(k - 1, j - 1, i - 1, 4, 0), &verts1(k - 1, j - 1, i - 1, 5, 0), &verts1(k - 1, j - 1, i - 1, 6, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), p10);
+                    // 0,3,4äº¤æŽ¥è¾¹ç‚¹ä¸‹æ ‡
+                    double pp0[3];
+                    double pp3[3];
+                    double pp4[3];
+                    _get_midpoint(&verts1(k - 1, j - 1, i - 1, 5, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), pp0);
+                    _get_midpoint(&verts1(k - 1, j - 1, i - 1, 6, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), pp3);
+                    _get_midpoint(&verts1(k - 1, j - 1, i - 1, 3, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), pp4);
+                    double n2[3];
+                    double n6[3];
+                    double n10[3];
+                    double n610[3];
+                    // é€šè¿‡ä¸¤ä¸ªç»çƒ­é¢çš„æµé‡ä¸º0,æµé‡çš„æ–¹å‘å¯æ ¹æ®å…¶æ³•å‘é‡ç¡®å®š
+                    _get_surface_normal(&verts1(k - 1, j - 1, i - 1, 7, 0), pp0, p2, pp4, n2, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i - 1, 7, 0), pp3, p6, pp4, n6, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i - 1, 7, 0), pp3, p10, pp0, n10, Axis::ZPOSITIVE);
+                    _cross_product(n6, n10, n610);
+                    Eigen::Matrix3d matK;
+                    _get_matK(pem1[cur], matK);
+                    Eigen::RowVector3d Dx;
+                    Eigen::Vector3d Dn;
+                    Dx << p2[0] - _cx(k - 1, j - 1, i - 1), p2[1] - _cy(k - 1, j - 1, i - 1), p2[2] - _cz(k - 1, j - 1, i - 1);
+                    Dn << n610[0], n610[1], n610[2];
+                    double cA = Dx * matK.inverse() * Dn;
+                    cA = _dot_product(n2, n610) / cA;
+                    B[cur] -= pb * cA;
+                    A(cur, cur) -= cA;
+                }
+                // 12æ¡è¾¹ä¸Šå…¶ä½™ç‚¹çš„å¤„ç†
+                else if (j == 0 && k == 0)
+                {
+                }
+            }
     for (iter = 0; iter < 100; iter++)
     {
         n = 0;
