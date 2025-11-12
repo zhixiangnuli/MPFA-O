@@ -1138,6 +1138,235 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                 // 12条边上其余点的处理
                 else if (j == 0 && k == 0)
                 {
+                    // 两个网格中心下标
+                    int i6 = cur, i7 = cur - 1;
+                    // 0,4,7,8,9交接面中点下标
+                    double p0[3];
+                    double p4[3];
+                    double p7[3];
+                    double p8[3];
+                    double p9[3];
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 6, 0), p0);
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 5, 0), p4);
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 3, 0), p8);
+                    _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 4, 0), &verts1(k, j, i - 1, 5, 0), p7);
+                    _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 2, 0), &verts1(k, j, i - 1, 3, 0), p9);
+                    // 1,2,3,5,交接边点下标
+                    double pp1[3];
+                    double pp2[3];
+                    double pp3[3];
+                    double pp5[3];
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), pp1);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), pp2);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 4, 0), pp5);
+                    _get_midpoint(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), pp3);
+                    double n0[3];
+                    double n4[3];
+                    double n8[3];
+                    double n48[3];
+                    double n7[3];
+                    double n9[3];
+                    double n79[3];
+                    // 通过两个绝热面的流量为0,流量的方向可根据其法向量确定
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp2, p0, pp5, n0, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp1, p4, pp5, n4, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp1, p8, pp2, n8, Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i - 1, 1, 0), pp3, p7, pp5, n7, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i - 1, 1, 0), pp3, p9, pp2, n9, Axis::ZPOSITIVE);
+                    _cross_product(n4, n8, n48);
+                    _cross_product(n7, n9, n79);
+                    Eigen::Matrix3d matK6, matK7;
+                    _get_matK(pem1[i6], matK6);
+                    _get_matK(pem1[i7], matK7);
+                    Eigen::RowVector3d Dx6, Dx7;
+                    Eigen::Vector3d Dn48, Dn79;
+                    Dx6 << p0[0] - _cx(k, j, i), p0[1] - _cy(k, j, i), p0[2] - _cz(k, j, i);
+                    Dn48 << n48[0], n48[1], n48[2];
+                    double cA6 = Dx6 * matK6.inverse() * Dn48;
+                    cA6 = _dot_product(n0, n48) / cA6;
+                    Dx7 << p7[0] - _cx(k, j, i - 1), p7[1] - _cy(k, j, i - 1), p7[2] - _cz(k, j, i - 1);
+                    Dn79 << n79[0], n79[1], n79[2];
+                    double cA7 = Dx7 * matK7.inverse() * Dn79;
+                    cA7 = _dot_product(n7, n79) / cA7;
+                    double cA = 0.5 * _harmonic(cA6, -cA7);
+                    A(i6, i6) += cA;
+                    A(i7, i7) += cA;
+                    A(i6, i7) -= cA;
+                    A(i7, i6) -= cA;
+                }
+                else if (j == ny && k == 0)
+                {
+                    // 两个网格中心下标
+                    int i5 = cur - nx, i4 = cur - nx - 1;
+                    // 1,4,7,10,11交接面中点下标
+                    double p1[3];
+                    double p4[3];
+                    double p7[3];
+                    double p10[3];
+                    double p11[3];
+                    _get_centroid(&verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), &verts1(k, j - 1, i, 6, 0), &verts1(k, j - 1, i, 7, 0), p4);
+                    _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 4, 0), &verts1(k, j - 1, i, 6, 0), p1);
+                    _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 1, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), p11);
+                    _get_centroid(&verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 6, 0), &verts1(k, j - 1, i - 1, 7, 0), p7);
+                    _get_centroid(&verts1(k, j - 1, i - 1, 1, 0), &verts1(k, j - 1, i - 1, 0, 0), &verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), p10);
+                    // 0,1,3,5交接边点下标
+                    double pp0[3];
+                    double pp1[3];
+                    double pp3[3];
+                    double pp5[3];
+                    _get_midpoint(&verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 1, 0), pp0);
+                    _get_midpoint(&verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), pp3);
+                    _get_midpoint(&verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 7, 0), pp5);
+                    _get_midpoint(&verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), pp1);
+                    double n1[3];
+                    double n4[3];
+                    double n11[3];
+                    double n411[3];
+                    double n7[3];
+                    double n10[3];
+                    double n710[3];
+                    // 通过两个绝热面的流量为0,流量的方向可根据其法向量确定
+                    _get_surface_normal(&verts1(k, j - 1, i - 1, 3, 0), pp0, p1, pp5, n1, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i - 1, 3, 0), pp3, p7, pp5, n7, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i - 1, 3, 0), pp3, p10, pp0, n10, Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i, 2, 0), pp1, p4, pp5, n4, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i, 2, 0), pp1, p11, pp0, n11, Axis::ZPOSITIVE);
+                    _cross_product(n4, n11, n411);
+                    _cross_product(n7, n10, n710);
+                    Eigen::Matrix3d matK4, matK5;
+                    _get_matK(pem1[i4], matK4);
+                    _get_matK(pem1[i5], matK5);
+                    Eigen::RowVector3d Dx4, Dx5;
+                    Eigen::Vector3d Dn411, Dn710;
+                    Dx5 << p1[0] - _cx(k, j - 1, i), p1[1] - _cy(k, j - 1, i), p1[2] - _cz(k, j - 1, i);
+                    Dn411 << n411[0], n411[1], n411[2];
+                    double cA5 = Dx5 * matK5.inverse() * Dn411;
+                    cA5 = _dot_product(n1, n411) / cA5;
+                    Dx4 << p1[0] - _cx(k, j - 1, i - 1), p1[1] - _cy(k, j - 1, i - 1), p1[2] - _cz(k, j - 1, i - 1);
+                    Dn710 << n710[0], n710[1], n710[2];
+                    double cA4 = Dx4 * matK4.inverse() * Dn710;
+                    cA4 = _dot_product(n7, n710) / cA4;
+                    double cA = 0.5 * _harmonic(cA5, -cA4);
+                    A(i5, i5) += cA;
+                    A(i4, i4) += cA;
+                    A(i5, i4) -= cA;
+                    A(i4, i5) -= cA;
+                }
+                else if (j == 0 && k == nz)
+                {
+                    //  两个网格中心下标
+                    int i2 = cur - nx * ny, i3 = cur - nx * ny - 1;
+                    // 3,5,6,8,9,交接面中点下标
+                    double p3[3];
+                    double p5[3];
+                    double p6[3];
+                    double p8[3];
+                    double p9[3];
+                    _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 2, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), p3);
+                    _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 1, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), p5);
+                    _get_centroid(&verts1(k - 1, j, 4, 0, 0), &verts1(k - 1, j, i, 5, 0), &verts1(k - 1, j, i, 6, 0), &verts1(k - 1, j, i, 7, 0), p8);
+                    _get_centroid(&verts1(k - 1, j, i - 1, 0, 0), &verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), p6);
+                    _get_centroid(&verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 6, 0), &verts1(k - 1, j, i - 1, 7, 0), p9);
+                    // 1,2,3,4,交接边点下标
+                    double pp1[3];
+                    double pp2[3];
+                    double pp3[3];
+                    double pp4[3];
+                    _get_midpoint(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), pp1);
+                    _get_midpoint(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), pp2);
+                    _get_midpoint(&verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 4, 0), pp3);
+                    _get_midpoint(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 4, 0), pp4);
+                    double n3[3];
+                    double n5[3];
+                    double n8[3];
+                    double n58[3];
+                    double n6[3];
+                    double n9[3];
+                    double n69[3];
+                    // 通过两个绝热面的流量为0,流量的方向可根据其法向量确定
+                    _get_surface_normal(&verts1(k - 1, j, i, 4, 0), pp4, p3, pp2, n3, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i, 4, 0), pp1, p5, pp4, n5, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i, 4, 0), pp1, p8, pp2, n8, Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i - 1, 5, 0), pp3, p6, pp4, n6, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i - 1, 5, 0), pp3, p9, pp2, n9, Axis::ZPOSITIVE);
+                    _cross_product(n5, n8, n58);
+                    _cross_product(n6, n9, n69);
+                    Eigen::Matrix3d matK2, matK3;
+                    _get_matK(pem1[i2], matK2);
+                    _get_matK(pem1[i3], matK3);
+                    Eigen::RowVector3d Dx2, Dx3;
+                    Eigen::Vector3d Dn58, Dn69;
+                    Dx2 << p3[0] - _cx(k - 1, j, i), p3[1] - _cy(k - 1, j, i), p3[2] - _cz(k - 1, j, i);
+                    Dn58 << n58[0], n58[1], n58[2];
+                    double cA2 = Dx2 * matK2.inverse() * Dn58;
+                    cA2 = _dot_product(n3, n58) / cA2;
+                    Dx3 << p3[0] - _cx(k - 1, j, i - 1), p3[1] - _cy(k - 1, j, i - 1), p3[2] - _cz(k - 1, j, i - 1);
+                    Dn69 << n69[0], n69[1], n69[2];
+                    double cA3 = Dx3 * matK3.inverse() * Dn69;
+                    cA3 = _dot_product(n3, n69) / cA3;
+                    double cA = 0.5 * _harmonic(cA2, -cA3);
+                    A(i2, i2) += cA;
+                    A(i3, i3) += cA;
+                    A(i2, i3) -= cA;
+                    A(i3, i2) -= cA;
+                }
+                else if (j == ny && k == nz)
+                {
+                    // 两个网格中心下标
+                    int i1 = cur - nx * ny - nx, i0 = cur - nx * ny - nx - 1;
+                    // 2,5,6,10,11交接面中点下标
+                    double p2[3];
+                    double p5[3];
+                    double p6[3];
+                    double p10[3];
+                    double p11[3];
+                    _get_centroid(&verts1(k - 1, j - 1, i, 2, 0), &verts1(k - 1, j - 1, i, 3, 0), &verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 7, 0), p5);
+                    _get_centroid(&verts1(k - 1, j - 1, i, 0, 0), &verts1(k - 1, j - 1, i, 2, 0), &verts1(k - 1, j - 1, i, 4, 0), &verts1(k - 1, j - 1, i, 6, 0), p2);
+                    _get_centroid(&verts1(k - 1, j - 1, i, 4, 0), &verts1(k - 1, j - 1, i, 5, 0), &verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 7, 0), p11);
+                    _get_centroid(&verts1(k - 1, j - 1, i - 1, 2, 0), &verts1(k - 1, j - 1, i - 1, 3, 0), &verts1(k - 1, j - 1, i - 1, 6, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), p6);
+                    _get_centroid(&verts1(k - 1, j - 1, i - 1, 4, 0), &verts1(k - 1, j - 1, i - 1, 5, 0), &verts1(k - 1, j - 1, i - 1, 6, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), p10);
+                    // 0,1,3,4交接边点下标
+                    double pp0[3];
+                    double pp1[3];
+                    double pp3[3];
+                    double pp4[3];
+                    _get_midpoint(&verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 4, 0), pp0);
+                    _get_midpoint(&verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 7, 0), pp1);
+                    _get_midpoint(&verts1(k - 1, j - 1, i - 1, 6, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), pp3);
+                    _get_midpoint(&verts1(k - 1, j - 1, i, 2, 0), &verts1(k - 1, j - 1, i, 6, 0), pp4);
+                    double n2[3];
+                    double n5[3];
+                    double n11[3];
+                    double n511[3];
+                    double n6[3];
+                    double n10[3];
+                    double n610[3];
+                    // 通过两个绝热面的流量为0,流量的方向可根据其法向量确定
+                    _get_surface_normal(&verts1(k - 1, j - 1, i, 6, 0), pp0, p2, pp4, n2, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i, 6, 0), pp1, p5, pp4, n5, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i, 6, 0), pp1, p11, pp0, n11, Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i - 1, 7, 0), pp3, p6, pp4, n6, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i - 1, 7, 0), pp3, p10, pp0, n10, Axis::ZPOSITIVE);
+                    _cross_product(n5, n11, n511);
+                    _cross_product(n6, n10, n610);
+                    Eigen::Matrix3d matK0, matK1;
+                    _get_matK(pem1[i0], matK0);
+                    _get_matK(pem1[i1], matK1);
+                    Eigen::RowVector3d Dx0, Dx1;
+                    Eigen::Vector3d Dn511, Dn610;
+                    Dx1 << p2[0] - _cx(k - 1, j - 1, i), p2[1] - _cy(k - 1, j - 1, i), p2[2] - _cz(k - 1, j - 1, i);
+                    Dn511 << n511[0], n511[1], n511[2];
+                    double cA1 = Dx1 * matK1.inverse() * Dn511;
+                    cA1 = _dot_product(n2, n511) / cA1;
+                    Dx0 << p2[0] - _cx(k - 1, j - 1, i - 1), p2[1] - _cy(k - 1, j - 1, i - 1), p2[2] - _cz(k - 1, j - 1, i - 1);
+                    Dn610 << n610[0], n610[1], n610[2];
+                    double cA0 = Dx0 * matK0.inverse() * Dn610;
+                    cA0 = _dot_product(n6, n610) / cA0;
+                    double cA = 0.5 * _harmonic(cA1, -cA0);
+                    A(i1, i1) += cA;
+                    A(i0, i0) += cA;
+                    A(i1, i0) -= cA;
+                    A(i0, i1) -= cA;
                 }
             }
     for (iter = 0; iter < 100; iter++)
