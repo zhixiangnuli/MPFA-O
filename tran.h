@@ -1368,6 +1368,253 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     A(i1, i0) -= cA;
                     A(i0, i1) -= cA;
                 }
+                else if (i == 0 && k == 0)
+                {
+                    // 两个网格中心下标
+                    int i6 = cur, i5 = cur - nx;
+                    // 0,1,4,8,11交接面中点下标
+                    double p0[3];
+                    double p1[3];
+                    double p4[3];
+                    double p8[3];
+                    double p11[3];
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 6, 0), p0);
+                    _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 4, 0), &verts1(k, j - 1, i, 6, 0), p1);
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 5, 0), p4);
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 3, 0), p8);
+                    _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 1, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), p11);
+                    // 0,1,2,5交接边点下标
+                    double pp0[3];
+                    double pp1[3];
+                    double pp2[3];
+                    double pp5[3];
+                    _get_midpoint(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 2, 0), pp0);
+                    _get_midpoint(&verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), pp1);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), pp2);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 4, 0), pp5);
+                    double n0[3];
+                    double n1[3];
+                    double n4[3];
+                    double n8[3];
+                    double n11[3];
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp2, p0, pp5, n0, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i, 2, 0), pp0, p1, pp5, n1, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp5, p4, pp1, n4, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp1, p8, pp2, n8, Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i, 2, 0), pp0, p11, pp1, n11, Axis::ZPOSITIVE);
+                    Eigen::Matrix<double, 6, 6> A;
+                    A.setZero();
+                    A.row(0) << 0, 0, 0, p0[0] - _cx(k, j, i), p0[1] - _cy(k, j, i), p0[2] - _cz(k, j, i);
+                    A.row(1) << p1[0] - _cx(k, j - 1, i), p1[1] - _cy(k, j - 1, i), p1[2] - _cz(k, j - 1, i), 0, 0, 0;
+                    A.row(2) << _cx(k, j - 1, i) - p4[0], _cy(k, j - 1, i) - p4[1], _cz(k, j - 1, i) - p4[2], p4[0] - _cx(k, j, i), p4[1] - _cy(k, j, i), p4[2] - _cz(k, j, i);
+                    Eigen::Matrix3d matK6, matK5;
+                    _get_matK(pem1[i6], matK6);
+                    _get_matK(pem1[i5], matK5);
+                    Eigen::RowVector3d v0, v1, v4, v8, v11;
+                    v0 << n0[0], n0[1], n0[2];
+                    v1 << n1[0], n1[1], n1[2];
+                    v4 << n4[0], n4[1], n4[2];
+                    v8 << n8[0], n8[1], n8[2];
+                    v11 << n11[0], n11[1], n11[2];
+                    A.block(3, 0, 1, 3) = v4 * matK5;
+                    A.block(3, 3, 1, 3) = -v4 * matK6;
+                    A.block(4, 3, 1, 3) = v8 * matK6;
+                    A.block(5, 0, 1, 3) = v11 * matK5;
+                    A = A.inverse();
+                    Eigen::RowVectorXd r = (v4 - v1) * matK5 * A.topRows(3);
+                    B[i5] -= pb * (r[0] + r[1]);
+                    A(i5, i5) += -r[1] + r[2];
+                    A(i5, i6) += -r[0] - r[2];
+                    r = -(v0 + v4) * matK6 * A.bottomRows(3);
+                    B[i6] -= pb * (r[0] + r[1]);
+                    A(i6, i5) += -r[1] + r[2];
+                    A(i6, i6) += -r[0] - r[2];
+                }
+                else if (i == nx && k == 0)
+                {
+                    // 两个网格中心下标
+                    int i7 = cur - 1, i4 = cur - nx - 1;
+                    // 0,1,7,9,10交接面中点下标
+                    double p0[3];
+                    double p1[3];
+                    double p7[3];
+                    double p9[3];
+                    double p10[3];
+                    _get_centroid(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 3, 0), &verts1(k, j, i - 1, 5, 0), &verts1(k, j, i - 1, 7, 0), p0);
+                    _get_centroid(&verts1(k, j - 1, i - 1, 1, 0), &verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 5, 0), &verts1(k, j - 1, i - 1, 7, 0), p1);
+                    _get_centroid(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 4, 0), &verts1(k, j, i - 1, 5, 0), p7);
+                    _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 2, 0), &verts1(k, j, i - 1, 3, 0), p9);
+                    _get_centroid(&verts1(k, j - 1, i - 1, 0, 0), &verts1(k, j - 1, i - 1, 1, 0), &verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), p10);
+                    // 2,3,0,5交接边点下标
+                    double pp2[3];
+                    double pp3[3];
+                    double pp0[3];
+                    double pp5[3];
+                    _get_midpoint(&verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 1, 0), pp0);
+                    _get_midpoint(&verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), pp3);
+                    _get_midpoint(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 3, 0), pp2);
+                    _get_midpoint(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 5, 0), pp5);
+                    double n0[3];
+                    double n1[3];
+                    double n7[3];
+                    double n9[3];
+                    double n10[3];
+                    _get_surface_normal(&verts1(k, j, i - 1, 1, 0), pp2, p0, pp5, n0, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i - 1, 3, 0), pp0, p1, pp5, n1, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i - 1, 1, 0), pp5, p7, pp3, n7, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i - 1, 1, 0), pp3, p9, pp2, n9, Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k, j - 1, i - 1, 3, 0), pp0, p10, pp3, n10, Axis::ZPOSITIVE);
+                    Eigen::Matrix<double, 6, 6> A;
+                    A.setZero();
+                    A.row(0) << 0, 0, 0, p0[0] - _cx(k, j, i - 1), p0[1] - _cy(k, j, i - 1), p0[2] - _cz(k, j, i - 1);
+                    A.row(1) << p1[0] - _cx(k, j - 1, i - 1), p1[1] - _cy(k, j - 1, i - 1), p1[2] - _cz(k, j - 1, i - 1), 0, 0, 0;
+                    A.row(2) << _cx(k, j - 1, i - 1) - p7[0], _cy(k, j - 1, i - 1) - p7[1], _cz(k, j - 1, i - 1) - p7[2], p7[0] - _cx(k, j, i - 1), p7[1] - _cy(k, j, i - 1), p7[2] - _cz(k, j, i - 1);
+                    Eigen::Matrix3d matK7, matK4;
+                    _get_matK(pem1[i7], matK7);
+                    _get_matK(pem1[i4], matK4);
+                    Eigen::RowVector3d v0, v1, v7, v9, v10;
+                    v0 << n0[0], n0[1], n0[2];
+                    v1 << n1[0], n1[1], n1[2];
+                    v7 << n7[0], n7[1], n7[2];
+                    v9 << n9[0], n9[1], n9[2];
+                    v10 << n10[0], n10[1], n10[2];
+                    A.block(3, 0, 1, 3) = v7 * matK4;
+                    A.block(3, 3, 1, 3) = -v7 * matK7;
+                    A.block(4, 3, 1, 3) = v9 * matK7;
+                    A.block(5, 0, 1, 3) = v10 * matK4;
+                    A = A.inverse();
+                    Eigen::RowVectorXd r = (v7 + v1) * matK4 * A.topRows(3);
+                    B[i4] -= pb * (r[0] + r[1]);
+                    A(i4, i4) += -r[1] + r[2];
+                    A(i4, i7) += -r[0] - r[2];
+                    r = (v0 - v7) * matK7 * A.bottomRows(3);
+                    B[i7] -= pb * (r[0] + r[1]);
+                    A(i7, i4) += -r[1] + r[2];
+                    A(i7, i7) += -r[0] - r[2];
+                }
+                else if (i == 0 && k == nz)
+                {
+                    // 两个网格中心下标
+                    int i2 = cur - nx * ny, i1 = i2 - nx;
+                    // 2,3,5,8,11交接面中点下标
+                    double p2[3];
+                    double p3[3];
+                    double p5[3];
+                    double p8[3];
+                    double p11[3];
+                    _get_centroid(&verts1(k - 1, j - 1, i, 0, 0), &verts1(k - 1, j - 1, i, 2, 0), &verts1(k - 1, j - 1, i, 4, 0), &verts1(k - 1, j - 1, i, 6, 0), p2);
+                    _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 2, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), p3);
+                    _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 1, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), p5);
+                    _get_centroid(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), &verts1(k - 1, j, i, 6, 0), &verts1(k - 1, j, i, 7, 0), p8);
+                    _get_centroid(&verts1(k - 1, j - 1, i, 4, 0), &verts1(k - 1, j - 1, i, 5, 0), &verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 7, 0), p11);
+                    // 0,1,2,4交接边点下标
+                    double pp0[3];
+                    double pp1[3];
+                    double pp2[3];
+                    double pp4[3];
+                    _get_midpoint(&verts1(k - 1, j - 1, i, 4, 0), &verts1(k - 1, j - 1, i, 6, 0), pp0);
+                    _get_midpoint(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), pp2);
+                    _get_midpoint(&verts1(k - 1, j - 1, i, 6, 0), &verts1(k - 1, j - 1, i, 7, 0), pp1);
+                    _get_midpoint(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 4, 0), pp4);
+                    double n2[3];
+                    double n3[3];
+                    double n5[3];
+                    double n8[3];
+                    double n11[3];
+                    _get_surface_normal(&verts1(k - 1, j - 1, i, 6, 0), pp0, p2, pp4, n2, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i, 4, 0), pp2, p3, pp4, n3, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i, 4, 0), pp4, p5, pp1, n5, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i, 4, 0), pp1, p8, pp2, n8, Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i, 6, 0), pp0, p11, pp1, n11, Axis::ZPOSITIVE);
+                    Eigen::Matrix<double, 6, 6> A;
+                    A.setZero();
+                    A.row(0) << 0, 0, 0, p3[0] - _cx(k - 1, j, i), p3[1] - _cy(k - 1, j, i), p3[2] - _cz(k - 1, j, i);
+                    A.row(1) << p2[0] - _cx(k - 1, j - 1, i), p2[1] - _cy(k - 1, j - 1, i), p2[2] - _cz(k - 1, j - 1, i), 0, 0, 0;
+                    A.row(2) << _cx(k - 1, j - 1, i) - p5[0], _cy(k - 1, j - 1, i) - p5[1], _cz(k - 1, j - 1, i) - p5[2], p5[0] - _cx(k - 1, j, i), p5[1] - _cy(k - 1, j, i), p5[2] - _cz(k - 1, j, i);
+                    Eigen::Matrix3d matK2, matK1;
+                    _get_matK(pem1[i2], matK2);
+                    _get_matK(pem1[i1], matK1);
+                    Eigen::RowVector3d v2, v3, v5, v8, v11;
+                    v2 << n2[0], n2[1], n2[2];
+                    v3 << n3[0], n3[1], n3[2];
+                    v5 << n5[0], n5[1], n5[2];
+                    v8 << n8[0], n8[1], n8[2];
+                    v11 << n11[0], n11[1], n11[2];
+                    A.block(3, 0, 1, 3) = v5 * matK1;
+                    A.block(3, 3, 1, 3) = -v5 * matK2;
+                    A.block(4, 3, 1, 3) = v8 * matK2;
+                    A.block(5, 0, 1, 3) = v11 * matK1;
+                    A = A.inverse();
+                    Eigen::RowVectorXd r = (v5 - v2) * matK1 * A.topRows(3);
+                    B[i1] -= pb * (r[0] + r[1]);
+                    A(i1, i1) += -r[1] + r[2];
+                    A(i1, i2) += -r[0] - r[2];
+                    r = -(v3 + v5) * matK2 * A.bottomRows(3);
+                    B[i2] -= pb * (r[0] + r[1]);
+                    A(i2, i1) += -r[1] + r[2];
+                    A(i2, i2) += -r[0] - r[2];
+                }
+                else if (i == nx && k == nz)
+                {
+                    int i3 = cur - nx * ny - 1, i0 = i3 - nx;
+                    // 2,3,6,9,10交接面中点下标
+                    double p2[3];
+                    double p3[3];
+                    double p6[3];
+                    double p9[3];
+                    double p10[3];
+                    _get_centroid(&verts1(k - 1, j - 1, i - 1, 1, 0), &verts1(k - 1, j - 1, i - 1, 3, 0), &verts1(k - 1, j - 1, i - 1, 5, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), p2);
+                    _get_centroid(&verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 3, 0), &verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 7, 0), p3);
+                    _get_centroid(&verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 0, 0), &verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), p6);
+                    _get_centroid(&verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 6, 0), &verts1(k - 1, j, i - 1, 7, 0), p9);
+                    _get_centroid(&verts1(k - 1, j - 1, i - 1, 4, 0), &verts1(k - 1, j - 1, i - 1, 5, 0), &verts1(k - 1, j - 1, i - 1, 6, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), p10);
+                    // 0,2,3,4交接边点下标
+                    double pp0[3];
+                    double pp2[3];
+                    double pp3[3];
+                    double pp4[3];
+                    _get_midpoint(&verts1(k - 1, j - 1, i - 1, 5, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), pp0);
+                    _get_midpoint(&verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 7, 0), pp2);
+                    _get_midpoint(&verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), pp3);
+                    _get_midpoint(&verts1(k - 1, j - 1, i - 1, 7, 0), &verts1(k - 1, j - 1, i - 1, 3, 0), pp4);
+                    double n2[3];
+                    double n3[3];
+                    double n6[3];
+                    double n9[3];
+                    double n10[3];
+                    _get_surface_normal(&verts1(k - 1, j - 1, i - 1, 7, 0), pp0, p2, pp4, n2, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i - 1, 5, 0), pp2, p3, pp4, n3, Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i - 1, 5, 0), pp4, p6, pp3, n6, Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j, i - 1, 5, 0), pp3, p9, pp2, n9, Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k - 1, j - 1, i - 1, 7, 0), pp0, p10, pp3, n10, Axis::ZPOSITIVE);
+                    Eigen::Matrix<double, 6, 6> A;
+                    A.setZero();
+                    A.row(0) << 0, 0, 0, p3[0] - _cx(k - 1, j, i - 1), p3[1] - _cy(k - 1, j, i - 1), p3[2] - _cz(k - 1, j, i - 1);
+                    A.row(1) << p2[0] - _cx(k - 1, j - 1, i - 1), p2[1] - _cy(k - 1, j - 1, i - 1), p2[2] - _cz(k - 1, j - 1, i - 1), 0, 0, 0;
+                    A.row(2) << _cx(k - 1, j - 1, i - 1) - p6[0], _cy(k - 1, j - 1, i - 1) - p6[1], _cz(k - 1, j - 1, i - 1) - p6[2], p6[0] - _cx(k - 1, j, i - 1), p6[1] - _cy(k - 1, j, i - 1), p6[2] - _cz(k - 1, j, i - 1);
+                    Eigen::Matrix3d matK3, matK0;
+                    _get_matK(pem1[i3], matK3);
+                    _get_matK(pem1[i0], matK0);
+                    Eigen::RowVector3d v2, v3, v6, v9, v10;
+                    v2 << n2[0], n2[1], n2[2];
+                    v3 << n3[0], n3[1], n3[2];
+                    v6 << n6[0], n6[1], n6[2];
+                    v9 << n9[0], n9[1], n9[2];
+                    v10 << n10[0], n10[1], n10[2];
+                    A.block(3, 0, 1, 3) = v6 * matK0;
+                    A.block(3, 3, 1, 3) = -v6 * matK3;
+                    A.block(4, 3, 1, 3) = v9 * matK3;
+                    A.block(5, 0, 1, 3) = v10 * matK0;
+                    A = A.inverse();
+                    Eigen::RowVectorXd r = (v6 + v2) * matK0 * A.topRows(3);
+                    B[i0] -= pb * (r[0] + r[1]);
+                    A(i0, i0) += -r[1] + r[2];
+                    A(i0, i3) += -r[0] - r[2];
+                    r = (v3 - v6) * matK3 * A.bottomRows(3);
+                    B[i3] -= pb * (r[0] + r[1]);
+                    A(i3, i0) += -r[1] + r[2];
+                    A(i3, i3) += -r[0] - r[2];
+                }
             }
     for (iter = 0; iter < 100; iter++)
     {
