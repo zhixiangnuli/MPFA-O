@@ -2498,6 +2498,172 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                 }
                 else
                 {
+                    int idx[8];
+                    idx[6] = cur;         // i6
+                    idx[7] = idx[6] - 1;  // i7
+                    idx[4] = idx[7] - nx; // i4
+                    idx[5] = idx[6] - nx; // i5
+
+                    int layerOffset = nx * ny;
+                    idx[0] = idx[4] - layerOffset; // i0
+                    idx[1] = idx[5] - layerOffset; // i1
+                    idx[2] = idx[6] - layerOffset; // i2
+                    idx[3] = idx[7] - layerOffset; // i3
+                    double p[12][3];
+                    _get_centroid(&verts1(k, j, i, 2, 0), &verts1(k, j, i, 0, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 6, 0), p[0]);
+                    _get_centroid(&verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 4, 0), &verts1(k, j - 1, i, 6, 0), p[1]);
+                    _get_centroid(&verts1(k - 1, j - 1, i, 2, 0), &verts1(k - 1, j - 1, i, 0, 0), &verts1(k - 1, j - 1, i, 4, 0), &verts1(k - 1, j - 1, i, 6, 0), p[2]);
+                    _get_centroid(&verts1(k - 1, j, i, 2, 0), &verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), p[3]);
+                    _get_centroid(&verts1(k, j, i, 1, 0), &verts1(k, j, i, 0, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 5, 0), p[4]);
+                    _get_centroid(&verts1(k - 1, j, i, 1, 0), &verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), p[5]);
+                    _get_centroid(&verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 0, 0), &verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), p[6]);
+                    _get_centroid(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 4, 0), &verts1(k, j, i - 1, 5, 0), p[7]);
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 3, 0), p[8]);
+                    _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 2, 0), &verts1(k, j, i - 1, 3, 0), p[9]);
+                    _get_centroid(&verts1(k, j - 1, i - 1, 0, 0), &verts1(k, j - 1, i - 1, 1, 0), &verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), p[10]);
+                    _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 1, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), p[11]);
+                    double pp[6][3];
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), pp[1]);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i - 1, 0, 0), pp[3]);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), pp[2]);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j - 1, i, 0, 0), pp[0]);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 4, 0), pp[5]);
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k - 1, j, i, 0, 0), pp[4]);
+                    double n[12][3];
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[2], p[0], pp[5], n[0], Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[0], p[1], pp[5], n[1], Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[0], p[2], pp[4], n[2], Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[4], p[3], pp[2], n[3], Axis::XPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[1], p[4], pp[5], n[4], Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[1], p[5], pp[4], n[5], Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[3], p[6], pp[4], n[6], Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[3], p[7], pp[5], n[7], Axis::YPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[1], p[8], pp[2], n[8], Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[3], p[9], pp[2], n[9], Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[3], p[10], pp[0], n[10], Axis::ZPOSITIVE);
+                    _get_surface_normal(&verts1(k, j, i, 0, 0), pp[0], p[11], pp[1], n[11], Axis::ZPOSITIVE);
+                    Eigen::Matrix<double, 24, 24> A;
+                    A.setZero();
+                    Eigen::Matrix3d matK[8];
+                    for (int l = 0; l < 8; ++l)
+                        _get_matK(pem1[idx[l]], matK[l]);
+                    Eigen::RowVector3d v[12];
+                    for (int l = 0; l < 12; ++l)
+                        v[l] << n[l][0], n[l][1], n[l][2];
+                    A.block(0, 18, 1, 6) << _cx(k, j, i) - p[0][0], _cy(k, j, i) - p[0][1], _cz(k, j, i) - p[0][2], p[0][0] - _cx(k, j, i - 1), p[0][1] - _cy(k, j, i - 1), p[0][2] - _cz(k, j, i - 1);
+                    A.block(1, 18, 1, 3) = v[0] * matK[6];
+                    A.block(1, 21, 1, 3) = -v[0] * matK[7];
+                    A.block(2, 12, 1, 6) << _cx(k, j - 1, i - 1) - p[1][0], _cy(k, j - 1, i - 1) - p[1][1], _cz(k, j - 1, i - 1) - p[1][2], p[1][0] - _cx(k, j - 1, i), p[1][1] - _cy(k, j - 1, i), p[1][2] - _cz(k, j - 1, i);
+                    A.block(3, 12, 1, 3) = v[1] * matK[4];
+                    A.block(3, 15, 1, 3) = -v[1] * matK[5];
+                    A.block(4, 0, 1, 6) << _cx(k - 1, j - 1, i - 1) - p[2][0], _cy(k - 1, j - 1, i - 1) - p[2][1], _cz(k - 1, j - 1, i - 1) - p[2][2], p[2][0] - _cx(k - 1, j - 1, i), p[2][1] - _cy(k - 1, j - 1, i), p[2][2] - _cz(k - 1, j - 1, i);
+                    A.block(5, 0, 1, 3) = v[2] * matK[0];
+                    A.block(5, 3, 1, 3) = -v[2] * matK[1];
+                    A.block(6, 6, 1, 6) << _cx(k - 1, j, i) - p[3][0], _cy(k - 1, j, i) - p[3][1], _cz(k - 1, j, i) - p[3][2], p[3][0] - _cx(k - 1, j, i - 1), p[3][1] - _cy(k - 1, j, i - 1), p[3][2] - _cz(k - 1, j, i - 1);
+                    A.block(7, 6, 1, 3) = v[3] * matK[2];
+                    A.block(7, 9, 1, 3) = -v[3] * matK[3];
+                    A.block(8, 15, 1, 6) << _cx(k, j - 1, i) - p[4][0], _cy(k, j - 1, i) - p[4][1], _cz(k, j - 1, i) - p[4][2], p[4][0] - _cx(k, j, i), p[4][1] - _cy(k, j, i), p[4][2] - _cz(k, j, i);
+                    A.block(9, 15, 1, 3) = v[4] * matK[5];
+                    A.block(9, 18, 1, 3) = -v[4] * matK[6];
+                    A.block(10, 3, 1, 6) << _cx(k - 1, j - 1, i) - p[5][0], _cy(k - 1, j - 1, i) - p[5][1], _cz(k - 1, j - 1, i) - p[5][2], p[5][0] - _cx(k - 1, j, i), p[5][1] - _cy(k - 1, j, i), p[5][2] - _cz(k - 1, j, i);
+                    A.block(11, 3, 1, 3) = v[5] * matK[1];
+                    A.block(11, 6, 1, 3) = -v[5] * matK[2];
+                    A.block(12, 0, 1, 3) << _cx(k - 1, j - 1, i - 1) - p[6][0], _cy(k - 1, j - 1, i - 1) - p[6][1], _cz(k - 1, j - 1, i - 1) - p[6][2];
+                    A.block(12, 9, 1, 3) << p[6][0] - _cx(k - 1, j, i - 1), p[6][1] - _cy(k - 1, j, i - 1), p[6][2] - _cz(k - 1, j, i - 1);
+                    A.block(13, 0, 1, 3) = v[6] * matK[0];
+                    A.block(13, 9, 1, 3) = -v[6] * matK[3];
+                    A.block(14, 12, 1, 3) << _cx(k, j - 1, i - 1) - p[7][0], _cy(k, j - 1, i - 1) - p[7][1], _cz(k, j - 1, i - 1) - p[7][2];
+                    A.block(14, 21, 1, 3) << p[7][0] - _cx(k, j, i - 1), p[7][1] - _cy(k, j, i - 1), p[7][2] - _cz(k, j, i - 1);
+                    A.block(15, 12, 1, 3) = v[7] * matK[4];
+                    A.block(15, 21, 1, 3) = -v[7] * matK[7];
+                    A.block(16, 6, 1, 3) << _cx(k - 1, j, i) - p[8][0], _cy(k - 1, j, i) - p[8][1], _cz(k - 1, j, i) - p[8][2];
+                    A.block(16, 18, 1, 3) << p[8][0] - _cx(k, j, i), p[8][1] - _cy(k, j, i), p[8][2] - _cz(k, j, i);
+                    A.block(17, 6, 1, 3) = v[8] * matK[2];
+                    A.block(17, 18, 1, 3) = -v[8] * matK[6];
+                    A.block(18, 9, 1, 3) << _cx(k - 1, j, i - 1) - p[9][0], _cy(k - 1, j, i - 1) - p[9][1], _cz(k - 1, j, i - 1) - p[9][2];
+                    A.block(18, 21, 1, 3) << p[9][0] - _cx(k, j, i - 1), p[9][1] - _cy(k, j, i - 1), p[9][2] - _cz(k, j, i - 1);
+                    A.block(19, 9, 1, 3) = v[9] * matK[3];
+                    A.block(19, 21, 1, 3) = -v[9] * matK[7];
+                    A.block(20, 0, 1, 3) << _cx(k - 1, j - 1, i - 1) - p[10][0], _cy(k - 1, j - 1, i - 1) - p[10][1], _cz(k - 1, j - 1, i - 1) - p[10][2];
+                    A.block(20, 12, 1, 3) << p[10][0] - _cx(k, j - 1, i - 1), p[10][1] - _cy(k, j - 1, i - 1), p[10][2] - _cz(k, j - 1, i - 1);
+                    A.block(21, 0, 1, 3) = v[10] * matK[0];
+                    A.block(21, 12, 1, 3) = -v[10] * matK[4];
+                    A.block(22, 3, 1, 3) << _cx(k - 1, j - 1, i) - p[11][0], _cy(k - 1, j - 1, i) - p[11][1], _cz(k - 1, j - 1, i) - p[11][2];
+                    A.block(22, 15, 1, 3) << p[11][0] - _cx(k, j - 1, i), p[11][1] - _cy(k, j - 1, i), p[11][2] - _cz(k, j - 1, i);
+                    A.block(23, 3, 1, 3) = v[11] * matK[1];
+                    A.block(23, 15, 1, 3) = -v[11] * matK[5];
+                    Eigen::RowVectorXd r = (v[2] + v[6] + v[10]) * matK[0] * A.topRows(3);
+                    C(idx[0], idx[0]) += r[4] + r[12] + r[20];
+                    C(idx[0], idx[1]) += -r[4] + r[10] + r[22];
+                    C(idx[0], idx[2]) += r[6] - r[10] + r[16];
+                    C(idx[0], idx[3]) += -r[6] - r[12] + r[18];
+                    C(idx[0], idx[4]) += r[2] + r[14] - r[20];
+                    C(idx[0], idx[5]) += -r[2] + r[8] - r[22];
+                    C(idx[0], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[0], idx[7]) += -r[0] - r[14] - r[18];
+                    r = (-v[2] + v[5] + v[11]) * matK[1] * A.block(3, 0, 3, 24);
+                    C(idx[1], idx[0]) += r[4] + r[12] + r[20];
+                    C(idx[1], idx[1]) += -r[4] + r[10] + r[22];
+                    C(idx[1], idx[2]) += r[6] - r[10] + r[16];
+                    C(idx[1], idx[3]) += -r[6] - r[12] + r[18];
+                    C(idx[1], idx[4]) += r[2] + r[14] - r[20];
+                    C(idx[1], idx[5]) += -r[2] + r[8] - r[22];
+                    C(idx[1], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[1], idx[7]) += -r[0] - r[14] - r[18];
+                    r = (-v[3] - v[5] + v[8]) * matK[2] * A.block(6, 0, 3, 24);
+                    C(idx[2], idx[0]) += r[4] + r[12] + r[20];
+                    C(idx[2], idx[1]) += -r[4] + r[10] + r[22];
+                    C(idx[2], idx[2]) += r[6] - r[10] + r[16];
+                    C(idx[2], idx[3]) += -r[6] - r[12] + r[18];
+                    C(idx[2], idx[4]) += r[2] + r[14] - r[20];
+                    C(idx[2], idx[5]) += -r[2] + r[8] - r[22];
+                    C(idx[2], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[2], idx[7]) += -r[0] - r[14] - r[18];
+                    r = (v[3] - v[6] + v[9]) * matK[3] * A.block(9, 0, 3, 24);
+                    C(idx[3], idx[0]) += r[4] + r[12] + r[20];
+                    C(idx[3], idx[1]) += -r[4] + r[10] + r[22];
+                    C(idx[3], idx[2]) += r[6] - r[10] + r[16];
+                    C(idx[3], idx[3]) += -r[6] - r[12] + r[18];
+                    C(idx[3], idx[4]) += r[2] + r[14] - r[20];
+                    C(idx[3], idx[5]) += -r[2] + r[8] - r[22];
+                    C(idx[3], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[3], idx[7]) += -r[0] - r[14] - r[18];
+                    r = (v[1] + v[7] - v[10]) * matK[4] * A.block(12, 0, 3, 24);
+                    C(idx[4], idx[0]) += r[4] + r[12] + r[20];
+                    C(idx[4], idx[1]) += -r[4] + r[10] + r[22];
+                    C(idx[4], idx[2]) += r[6] - r[10] + r[16];
+                    C(idx[4], idx[3]) += -r[6] - r[12] + r[18];
+                    C(idx[4], idx[4]) += r[2] + r[14] - r[20];
+                    C(idx[4], idx[5]) += -r[2] + r[8] - r[22];
+                    C(idx[4], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[4], idx[7]) += -r[0] - r[14] - r[18];
+                    r = (-v[1] + v[4] - v[11]) * matK[5] * A.block(15, 0, 3, 24);
+                    C(idx[5], idx[0]) += r[4] + r[12] + r[20];
+                    C(idx[5], idx[1]) += -r[4] + r[10] + r[22];
+                    C(idx[5], idx[2]) += r[6] - r[10] + r[16];
+                    C(idx[5], idx[3]) += -r[6] - r[12] + r[18];
+                    C(idx[5], idx[4]) += r[2] + r[14] - r[20];
+                    C(idx[5], idx[5]) += -r[2] + r[8] - r[22];
+                    C(idx[5], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[5], idx[7]) += -r[0] - r[14] - r[18];
+                    r = (-v[0] - v[4] - v[8]) * matK[6] * A.block(18, 0, 3, 24);
+                    C(idx[6], idx[0]) += r[4] + r[12] + r[20];
+                    C(idx[6], idx[1]) += -r[4] + r[10] + r[22];
+                    C(idx[6], idx[2]) += r[6] - r[10] + r[16];
+                    C(idx[6], idx[3]) += -r[6] - r[12] + r[18];
+                    C(idx[6], idx[4]) += r[2] + r[14] - r[20];
+                    C(idx[6], idx[5]) += -r[2] + r[8] - r[22];
+                    C(idx[6], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[6], idx[7]) += -r[0] - r[14] - r[18];
+                    r = (v[0] - v[7] - v[9]) * matK[7] * A.block(21, 0, 3, 24);
+                    C(idx[7], idx[0]) += r[4] + r[12] + r[20];
+                    C(idx[7], idx[1]) += -r[4] + r[10] + r[22];
+                    C(idx[7], idx[2]) += r[6] - r[10] + r[16];
+                    C(idx[7], idx[3]) += -r[6] - r[12] + r[18];
+                    C(idx[7], idx[4]) += r[2] + r[14] - r[20];
+                    C(idx[7], idx[5]) += -r[2] + r[8] - r[22];
+                    C(idx[7], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[7], idx[7]) += -r[0] - r[14] - r[18];
                     // 内部角点
                 }
             }
