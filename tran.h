@@ -1024,7 +1024,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     B[cur] -= pb * cA;
                     C(cur, cur) -= cA;
                 }
-                else if (i = nx && j == ny && k == 0)
+                else if (i == nx && j == ny && k == 0)
                 {
                     cur -= nx + 1;
                     // 1,7,10交接面中点下标
@@ -1184,10 +1184,10 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     Dn48 << n48[0], n48[1], n48[2];
                     double cA6 = Dx6 * matK6.inverse() * Dn48;
                     cA6 = _dot_product(n0, n48) / cA6;
-                    Dx7 << p7[0] - _cx(k, j, i - 1), p7[1] - _cy(k, j, i - 1), p7[2] - _cz(k, j, i - 1);
+                    Dx7 << p0[0] - _cx(k, j, i - 1), p0[1] - _cy(k, j, i - 1), p0[2] - _cz(k, j, i - 1);
                     Dn79 << n79[0], n79[1], n79[2];
                     double cA7 = Dx7 * matK7.inverse() * Dn79;
-                    cA7 = _dot_product(n7, n79) / cA7;
+                    cA7 = _dot_product(n0, n79) / cA7;
                     double cA = 0.5 * _harmonic(cA6, -cA7);
                     C(i6, i6) += cA;
                     C(i7, i7) += cA;
@@ -1245,7 +1245,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     Dx4 << p1[0] - _cx(k, j - 1, i - 1), p1[1] - _cy(k, j - 1, i - 1), p1[2] - _cz(k, j - 1, i - 1);
                     Dn710 << n710[0], n710[1], n710[2];
                     double cA4 = Dx4 * matK4.inverse() * Dn710;
-                    cA4 = _dot_product(n7, n710) / cA4;
+                    cA4 = _dot_product(n1, n710) / cA4;
                     double cA = 0.5 * _harmonic(cA5, -cA4);
                     C(i5, i5) += cA;
                     C(i4, i4) += cA;
@@ -1483,11 +1483,11 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     A.block(4, 3, 1, 3) = v9 * matK7;
                     A.block(5, 0, 1, 3) = v10 * matK4;
                     A = A.inverse();
-                    Eigen::RowVectorXd r = (v7 + v1) * matK4 * A.topRows(3);
+                    Eigen::RowVectorXd r = (v7 + v1 - v10) * matK4 * A.topRows(3);
                     B[i4] -= pb * (r[0] + r[1]);
                     C(i4, i4) += -r[1] + r[2];
                     C(i4, i7) += -r[0] - r[2];
-                    r = (v0 - v7) * matK7 * A.bottomRows(3);
+                    r = (v0 - v7 - v9) * matK7 * A.bottomRows(3);
                     B[i7] -= pb * (r[0] + r[1]);
                     C(i7, i4) += -r[1] + r[2];
                     C(i7, i7) += -r[0] - r[2];
@@ -2308,7 +2308,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 4, 0), &verts1(k, j, i - 1, 5, 0), p7);
                     _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 3, 0), p8);
                     _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 1, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), p11);
-                    _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), p9);
+                    _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 2, 0), &verts1(k, j, i - 1, 3, 0), p9);
                     _get_centroid(&verts1(k, j - 1, i - 1, 0, 0), &verts1(k, j - 1, i - 1, 1, 0), &verts1(k, j - 1, i - 1, 2, 0), &verts1(k, j - 1, i - 1, 3, 0), p10);
                     // 0,1,2,3,5 交接边点下标
                     double pp0[3];
@@ -2592,6 +2592,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     A.block(22, 15, 1, 3) << p[11][0] - _cx(k, j - 1, i), p[11][1] - _cy(k, j - 1, i), p[11][2] - _cz(k, j - 1, i);
                     A.block(23, 3, 1, 3) = v[11] * matK[1];
                     A.block(23, 15, 1, 3) = -v[11] * matK[5];
+                    A = A.inverse();
                     Eigen::RowVectorXd r = (v[2] + v[6] + v[10]) * matK[0] * A.topRows(3);
                     C(idx[0], idx[0]) += r[4] + r[12] + r[20];
                     C(idx[0], idx[1]) += -r[4] + r[10] + r[22];
@@ -2599,7 +2600,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     C(idx[0], idx[3]) += -r[6] - r[12] + r[18];
                     C(idx[0], idx[4]) += r[2] + r[14] - r[20];
                     C(idx[0], idx[5]) += -r[2] + r[8] - r[22];
-                    C(idx[0], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[0], idx[6]) += r[0] - r[8] - r[16];
                     C(idx[0], idx[7]) += -r[0] - r[14] - r[18];
                     r = (-v[2] + v[5] + v[11]) * matK[1] * A.block(3, 0, 3, 24);
                     C(idx[1], idx[0]) += r[4] + r[12] + r[20];
@@ -2608,7 +2609,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     C(idx[1], idx[3]) += -r[6] - r[12] + r[18];
                     C(idx[1], idx[4]) += r[2] + r[14] - r[20];
                     C(idx[1], idx[5]) += -r[2] + r[8] - r[22];
-                    C(idx[1], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[1], idx[6]) += r[0] - r[8] - r[16];
                     C(idx[1], idx[7]) += -r[0] - r[14] - r[18];
                     r = (-v[3] - v[5] + v[8]) * matK[2] * A.block(6, 0, 3, 24);
                     C(idx[2], idx[0]) += r[4] + r[12] + r[20];
@@ -2617,7 +2618,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     C(idx[2], idx[3]) += -r[6] - r[12] + r[18];
                     C(idx[2], idx[4]) += r[2] + r[14] - r[20];
                     C(idx[2], idx[5]) += -r[2] + r[8] - r[22];
-                    C(idx[2], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[2], idx[6]) += r[0] - r[8] - r[16];
                     C(idx[2], idx[7]) += -r[0] - r[14] - r[18];
                     r = (v[3] - v[6] + v[9]) * matK[3] * A.block(9, 0, 3, 24);
                     C(idx[3], idx[0]) += r[4] + r[12] + r[20];
@@ -2626,7 +2627,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     C(idx[3], idx[3]) += -r[6] - r[12] + r[18];
                     C(idx[3], idx[4]) += r[2] + r[14] - r[20];
                     C(idx[3], idx[5]) += -r[2] + r[8] - r[22];
-                    C(idx[3], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[3], idx[6]) += r[0] - r[8] - r[16];
                     C(idx[3], idx[7]) += -r[0] - r[14] - r[18];
                     r = (v[1] + v[7] - v[10]) * matK[4] * A.block(12, 0, 3, 24);
                     C(idx[4], idx[0]) += r[4] + r[12] + r[20];
@@ -2635,7 +2636,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     C(idx[4], idx[3]) += -r[6] - r[12] + r[18];
                     C(idx[4], idx[4]) += r[2] + r[14] - r[20];
                     C(idx[4], idx[5]) += -r[2] + r[8] - r[22];
-                    C(idx[4], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[4], idx[6]) += r[0] - r[8] - r[16];
                     C(idx[4], idx[7]) += -r[0] - r[14] - r[18];
                     r = (-v[1] + v[4] - v[11]) * matK[5] * A.block(15, 0, 3, 24);
                     C(idx[5], idx[0]) += r[4] + r[12] + r[20];
@@ -2644,7 +2645,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     C(idx[5], idx[3]) += -r[6] - r[12] + r[18];
                     C(idx[5], idx[4]) += r[2] + r[14] - r[20];
                     C(idx[5], idx[5]) += -r[2] + r[8] - r[22];
-                    C(idx[5], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[5], idx[6]) += r[0] - r[8] - r[16];
                     C(idx[5], idx[7]) += -r[0] - r[14] - r[18];
                     r = (-v[0] - v[4] - v[8]) * matK[6] * A.block(18, 0, 3, 24);
                     C(idx[6], idx[0]) += r[4] + r[12] + r[20];
@@ -2653,7 +2654,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     C(idx[6], idx[3]) += -r[6] - r[12] + r[18];
                     C(idx[6], idx[4]) += r[2] + r[14] - r[20];
                     C(idx[6], idx[5]) += -r[2] + r[8] - r[22];
-                    C(idx[6], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[6], idx[6]) += r[0] - r[8] - r[16];
                     C(idx[6], idx[7]) += -r[0] - r[14] - r[18];
                     r = (v[0] - v[7] - v[9]) * matK[7] * A.block(21, 0, 3, 24);
                     C(idx[7], idx[0]) += r[4] + r[12] + r[20];
@@ -2662,215 +2663,216 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     C(idx[7], idx[3]) += -r[6] - r[12] + r[18];
                     C(idx[7], idx[4]) += r[2] + r[14] - r[20];
                     C(idx[7], idx[5]) += -r[2] + r[8] - r[22];
-                    C(idx[7], idx[6]) += r[0] - r[8] - r[22];
+                    C(idx[7], idx[6]) += r[0] - r[8] - r[16];
                     C(idx[7], idx[7]) += -r[0] - r[14] - r[18];
                     // 内部角点
                 }
             }
-    for (iter = 0; iter < 100; iter++)
-    {
-        n = 0;
-        nnz = 0;
-        Ptr[0] = 0;
+    pmgmres_ilu_cr(nx * ny * nz, nnz, Ptr, Idx, Val, x, B, 1000, 1000, 1e-5, 1e-5);
+    // for (iter = 0; iter < 100; iter++)
+    // {
+    //     n = 0;
+    //     nnz = 0;
+    //     Ptr[0] = 0;
 
-        /*for (int i = 0; i < 27; i++) {
-            std::cout << beta[i][0] << " " << beta[i][1] << " " << beta[i][2] << "\n";
-        }*/
+    //     /*for (int i = 0; i < 27; i++) {
+    //         std::cout << beta[i][0] << " " << beta[i][1] << " " << beta[i][2] << "\n";
+    //     }*/
 
-        std::cout << "iter=" << iter << "\n";
-        for (k = 0; k < nz; k++)
-        {
-            for (j = 0; j < ny; j++)
-            {
-                for (i = 0; i < nx; i++)
-                {
-                    // i = 1; j = 1; k = 1;
-                    // std::cout << "(" << i << "," << j << "," << k << ") : ";
-                    count = 0;
-                    double val = 0.0;
-                    double F = 0.0;
-                    double F1 = 0.0;
-                    int i0 = k * nx * ny + j * nx + i;
+    //     std::cout << "iter=" << iter << "\n";
+    //     for (k = 0; k < nz; k++)
+    //     {
+    //         for (j = 0; j < ny; j++)
+    //         {
+    //             for (i = 0; i < nx; i++)
+    //             {
+    //                 // i = 1; j = 1; k = 1;
+    //                 // std::cout << "(" << i << "," << j << "," << k << ") : ";
+    //                 count = 0;
+    //                 double val = 0.0;
+    //                 double F = 0.0;
+    //                 double F1 = 0.0;
+    //                 int i0 = k * nx * ny + j * nx + i;
 
-                    _get_F(pem1, p, i, j, k, _verts1, F, divn);
-                    // std::cout << "F=" << F << std::endl;
+    //                 _get_F(pem1, p, i, j, k, _verts1, F, divn);
+    //                 // std::cout << "F=" << F << std::endl;
 
-                    B[n] = -F;
-                    if (k > 0)
-                    {
-                        _get_csr(pem1, p, i, j, k, _verts1, F, i, j, k - 1, Idx, Val, nnz, count, divn);
+    //                 B[n] = -F;
+    //                 if (k > 0)
+    //                 {
+    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i, j, k - 1, Idx, Val, nnz, count, divn);
 
-                        if (i > 0)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j, k - 1, Idx, Val, nnz, count, divn);
+    //                     if (i > 0)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j, k - 1, Idx, Val, nnz, count, divn);
 
-                            if (j > 0)
-                            {
-                                _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j - 1, k - 1, Idx, Val, nnz, count, divn);
-                            }
-                            if (j < ny - 1)
-                            {
-                                _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j + 1, k - 1, Idx, Val, nnz, count, divn);
-                            }
-                        }
-                        if (i < nx - 1)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j, k - 1, Idx, Val, nnz, count, divn);
+    //                         if (j > 0)
+    //                         {
+    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j - 1, k - 1, Idx, Val, nnz, count, divn);
+    //                         }
+    //                         if (j < ny - 1)
+    //                         {
+    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j + 1, k - 1, Idx, Val, nnz, count, divn);
+    //                         }
+    //                     }
+    //                     if (i < nx - 1)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j, k - 1, Idx, Val, nnz, count, divn);
 
-                            if (j > 0)
-                            {
-                                _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j - 1, k - 1, Idx, Val, nnz, count, divn);
-                            }
-                            if (j < ny - 1)
-                            {
-                                _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j + 1, k - 1, Idx, Val, nnz, count, divn);
-                            }
-                        }
-                        if (j > 0)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i, j - 1, k - 1, Idx, Val, nnz, count, divn);
-                        }
-                        if (j < ny - 1)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i, j + 1, k - 1, Idx, Val, nnz, count, divn);
-                        }
-                    }
+    //                         if (j > 0)
+    //                         {
+    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j - 1, k - 1, Idx, Val, nnz, count, divn);
+    //                         }
+    //                         if (j < ny - 1)
+    //                         {
+    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j + 1, k - 1, Idx, Val, nnz, count, divn);
+    //                         }
+    //                     }
+    //                     if (j > 0)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i, j - 1, k - 1, Idx, Val, nnz, count, divn);
+    //                     }
+    //                     if (j < ny - 1)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i, j + 1, k - 1, Idx, Val, nnz, count, divn);
+    //                     }
+    //                 }
 
-                    if (j > 0)
-                    {
-                        _get_csr(pem1, p, i, j, k, _verts1, F, i, j - 1, k, Idx, Val, nnz, count, divn);
-                    }
-                    if (i > 0)
-                    {
-                        _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j, k, Idx, Val, nnz, count, divn);
+    //                 if (j > 0)
+    //                 {
+    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i, j - 1, k, Idx, Val, nnz, count, divn);
+    //                 }
+    //                 if (i > 0)
+    //                 {
+    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j, k, Idx, Val, nnz, count, divn);
 
-                        if (j > 0)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j - 1, k, Idx, Val, nnz, count, divn);
-                        }
-                        if (j < ny - 1)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j + 1, k, Idx, Val, nnz, count, divn);
-                        }
-                    }
-                    _get_csr(pem1, p, i, j, k, _verts1, F, i, j, k, Idx, Val, nnz, count, divn);
-                    if (i < nx - 1)
-                    {
-                        _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j, k, Idx, Val, nnz, count, divn);
+    //                     if (j > 0)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j - 1, k, Idx, Val, nnz, count, divn);
+    //                     }
+    //                     if (j < ny - 1)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j + 1, k, Idx, Val, nnz, count, divn);
+    //                     }
+    //                 }
+    //                 _get_csr(pem1, p, i, j, k, _verts1, F, i, j, k, Idx, Val, nnz, count, divn);
+    //                 if (i < nx - 1)
+    //                 {
+    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j, k, Idx, Val, nnz, count, divn);
 
-                        if (j > 0)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j - 1, k, Idx, Val, nnz, count, divn);
-                        }
-                        if (j < ny - 1)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j + 1, k, Idx, Val, nnz, count, divn);
-                        }
-                    }
-                    if (j < ny - 1)
-                    {
-                        _get_csr(pem1, p, i, j, k, _verts1, F, i, j + 1, k, Idx, Val, nnz, count, divn);
-                    }
+    //                     if (j > 0)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j - 1, k, Idx, Val, nnz, count, divn);
+    //                     }
+    //                     if (j < ny - 1)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j + 1, k, Idx, Val, nnz, count, divn);
+    //                     }
+    //                 }
+    //                 if (j < ny - 1)
+    //                 {
+    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i, j + 1, k, Idx, Val, nnz, count, divn);
+    //                 }
 
-                    if (k < nz - 1)
-                    {
-                        _get_csr(pem1, p, i, j, k, _verts1, F, i, j, k + 1, Idx, Val, nnz, count, divn);
+    //                 if (k < nz - 1)
+    //                 {
+    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i, j, k + 1, Idx, Val, nnz, count, divn);
 
-                        if (i > 0)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j, k + 1, Idx, Val, nnz, count, divn);
+    //                     if (i > 0)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j, k + 1, Idx, Val, nnz, count, divn);
 
-                            if (j > 0)
-                            {
-                                _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j - 1, k + 1, Idx, Val, nnz, count, divn);
-                            }
-                            if (j < ny - 1)
-                            {
-                                _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j + 1, k + 1, Idx, Val, nnz, count, divn);
-                            }
-                        }
-                        if (i < nx - 1)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j, k + 1, Idx, Val, nnz, count, divn);
+    //                         if (j > 0)
+    //                         {
+    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j - 1, k + 1, Idx, Val, nnz, count, divn);
+    //                         }
+    //                         if (j < ny - 1)
+    //                         {
+    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j + 1, k + 1, Idx, Val, nnz, count, divn);
+    //                         }
+    //                     }
+    //                     if (i < nx - 1)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j, k + 1, Idx, Val, nnz, count, divn);
 
-                            if (j > 0)
-                            {
-                                _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j - 1, k + 1, Idx, Val, nnz, count, divn);
-                            }
-                            if (j < ny - 1)
-                            {
-                                _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j + 1, k + 1, Idx, Val, nnz, count, divn);
-                            }
-                        }
-                        if (j > 0)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i, j - 1, k + 1, Idx, Val, nnz, count, divn);
-                        }
-                        if (j < ny - 1)
-                        {
-                            _get_csr(pem1, p, i, j, k, _verts1, F, i, j + 1, k + 1, Idx, Val, nnz, count, divn);
-                        }
-                    }
-                    Ptr[n + 1] = Ptr[n] + count;
+    //                         if (j > 0)
+    //                         {
+    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j - 1, k + 1, Idx, Val, nnz, count, divn);
+    //                         }
+    //                         if (j < ny - 1)
+    //                         {
+    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j + 1, k + 1, Idx, Val, nnz, count, divn);
+    //                         }
+    //                     }
+    //                     if (j > 0)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i, j - 1, k + 1, Idx, Val, nnz, count, divn);
+    //                     }
+    //                     if (j < ny - 1)
+    //                     {
+    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i, j + 1, k + 1, Idx, Val, nnz, count, divn);
+    //                     }
+    //                 }
+    //                 Ptr[n + 1] = Ptr[n] + count;
 
-                    n = n + 1;
-                    // std::cout << std::endl;
-                }
-            }
-        }
+    //                 n = n + 1;
+    //                 // std::cout << std::endl;
+    //             }
+    //         }
+    //     }
 
-        // FILE* fp = std::fopen("Val_MPFA.INC", "w");
-        // for (int ii = 0; ii < nnz; ii++) {
-        //     std::fprintf(fp, "%le\n", Val[ii]);
-        // }
-        // std::fclose(fp);
+    //     // FILE* fp = std::fopen("Val_MPFA.INC", "w");
+    //     // for (int ii = 0; ii < nnz; ii++) {
+    //     //     std::fprintf(fp, "%le\n", Val[ii]);
+    //     // }
+    //     // std::fclose(fp);
 
-        pmgmres_ilu_cr(nx * ny * nz, nnz, Ptr, Idx, Val, x, B, 1000, 1000, 1e-5, 1e-5);
+    //     pmgmres_ilu_cr(nx * ny * nz, nnz, Ptr, Idx, Val, x, B, 1000, 1000, 1e-5, 1e-5);
 
-        double res = 0.0;
+    //     double res = 0.0;
 
-        for (int i = 0; i < nx * ny * nz; ++i)
-        {
-            if (std::abs(x[i]) > res)
-                res = std::abs(x[i]);
-        }
+    //     for (int i = 0; i < nx * ny * nz; ++i)
+    //     {
+    //         if (std::abs(x[i]) > res)
+    //             res = std::abs(x[i]);
+    //     }
 
-        for (int i = 0; i < nx * ny * nz; ++i)
-        {
-            p[i] += x[i];
-        }
+    //     for (int i = 0; i < nx * ny * nz; ++i)
+    //     {
+    //         p[i] += x[i];
+    //     }
 
-        Q = 0.0;
-        for (int k = 0; k < nz; k++)
-        {
-            for (int j = 0; j < ny; j++)
-            {
-                const double *pp[4];
-                double S = 0.0, D = 0.0;
-                double pc[3];
-                int i0 = k * nx * ny + j * nx + nx - 1;
+    //     Q = 0.0;
+    //     for (int k = 0; k < nz; k++)
+    //     {
+    //         for (int j = 0; j < ny; j++)
+    //         {
+    //             const double *pp[4];
+    //             double S = 0.0, D = 0.0;
+    //             double pc[3];
+    //             int i0 = k * nx * ny + j * nx + nx - 1;
 
-                pp[0] = &verts1(k, j, nx - 1, 1, 0);
-                pp[1] = &verts1(k, j, nx - 1, 3, 0);
-                pp[2] = &verts1(k, j, nx - 1, 5, 0);
-                pp[3] = &verts1(k, j, nx - 1, 7, 0);
+    //             pp[0] = &verts1(k, j, nx - 1, 1, 0);
+    //             pp[1] = &verts1(k, j, nx - 1, 3, 0);
+    //             pp[2] = &verts1(k, j, nx - 1, 5, 0);
+    //             pp[3] = &verts1(k, j, nx - 1, 7, 0);
 
-                pc[0] = _cx(k, j, nx - 1);
-                pc[1] = _cy(k, j, nx - 1);
-                pc[2] = _cz(k, j, nx - 1);
+    //             pc[0] = _cx(k, j, nx - 1);
+    //             pc[1] = _cy(k, j, nx - 1);
+    //             pc[2] = _cz(k, j, nx - 1);
 
-                S = _get_area(pp[0], pp[1], pp[2]) + _get_area(pp[3], pp[1], pp[2]);
-                D = _get_distance(pc, pp[1], pp[2], pp[3]);
-                Q = Q + (Phigh - p[i0]) * S / D * pem1[i0].x;
-            }
-        }
+    //             S = _get_area(pp[0], pp[1], pp[2]) + _get_area(pp[3], pp[1], pp[2]);
+    //             D = _get_distance(pc, pp[1], pp[2], pp[3]);
+    //             Q = Q + (Phigh - p[i0]) * S / D * pem1[i0].x;
+    //         }
+    //     }
 
-        Iter = iter;
-        std::cout << "Q=" << Q << "\n";
-        std::cout << "res=" << res << "\n";
-        if (res < 1.0e-3)
-            break;
-    }
+    //     Iter = iter;
+    //     std::cout << "Q=" << Q << "\n";
+    //     std::cout << "res=" << res << "\n";
+    //     if (res < 1.0e-3)
+    //         break;
+    // }
     delete[] pem1, p, Ptr, Idx, Val, B, x, _verts1, cx, cy, cz;
     std::cout << std::endl;
 }

@@ -384,144 +384,144 @@ void _get_3x3(double *_verts, Ktensor *pem, double pemx,
               double pemy, double pemz, double pemxy, double pemyz, double pemxz, int Lamda)
 {
     std::mdspan<double, std::extents<size_t, -1, -1, -1, 8, 3>> verts(_verts, nzz, nyy, nxx);
-    for (int i = 0; i < nxx; i++)
-    {
-        verts(0, 0, i, 0, 0) = i * 1.0;
-        verts(0, 0, i, 0, 1) = i * 0.15;
-        verts(0, 0, i, 0, 2) = 0.0;
-        verts(0, 0, i, 1, 0) = i * 1.0 + 1.0;
-        verts(0, 0, i, 1, 1) = i * 0.15 + 0.15;
-        verts(0, 0, i, 1, 2) = 0.0;
-        verts(0, 0, i, 2, 0) = i * 1.0 - 0.1;
-        verts(0, 0, i, 2, 1) = i * 0.2 + 1.0;
-        verts(0, 0, i, 2, 2) = 0.0;
-        verts(0, 0, i, 3, 0) = i * 1.0 + 1.0 - 0.1;
-        verts(0, 0, i, 3, 1) = i * 0.2 + 1.2;
-        verts(0, 0, i, 3, 2) = 0.0;
+    // for (int i = 0; i < nxx; i++)
+    // {
+    //     verts(0, 0, i, 0, 0) = i * 1.0;
+    //     verts(0, 0, i, 0, 1) = i * 0.15;
+    //     verts(0, 0, i, 0, 2) = 0.0;
+    //     verts(0, 0, i, 1, 0) = i * 1.0 + 1.0;
+    //     verts(0, 0, i, 1, 1) = i * 0.15 + 0.15;
+    //     verts(0, 0, i, 1, 2) = 0.0;
+    //     verts(0, 0, i, 2, 0) = i * 1.0 - 0.1;
+    //     verts(0, 0, i, 2, 1) = i * 0.2 + 1.0;
+    //     verts(0, 0, i, 2, 2) = 0.0;
+    //     verts(0, 0, i, 3, 0) = i * 1.0 + 1.0 - 0.1;
+    //     verts(0, 0, i, 3, 1) = i * 0.2 + 1.2;
+    //     verts(0, 0, i, 3, 2) = 0.0;
 
-        verts(0, 1, i, 0, 0) = verts(0, 0, i, 2, 0);
-        verts(0, 1, i, 0, 1) = verts(0, 0, i, 2, 1);
-        verts(0, 1, i, 0, 2) = verts(0, 0, i, 2, 2);
-        verts(0, 1, i, 1, 0) = verts(0, 0, i, 3, 0);
-        verts(0, 1, i, 1, 1) = verts(0, 0, i, 3, 1);
-        verts(0, 1, i, 1, 2) = verts(0, 0, i, 3, 2);
-        verts(0, 1, i, 2, 0) = i * 1.0;
-        verts(0, 1, i, 2, 1) = i * 0.2 + 2.25;
-        verts(0, 1, i, 2, 2) = 0.0;
-        verts(0, 1, i, 3, 0) = i * 1.0 + 1.0;
-        verts(0, 1, i, 3, 1) = i * 0.2 + 2.45;
-        verts(0, 1, i, 3, 2) = 0.0;
+    //     verts(0, 1, i, 0, 0) = verts(0, 0, i, 2, 0);
+    //     verts(0, 1, i, 0, 1) = verts(0, 0, i, 2, 1);
+    //     verts(0, 1, i, 0, 2) = verts(0, 0, i, 2, 2);
+    //     verts(0, 1, i, 1, 0) = verts(0, 0, i, 3, 0);
+    //     verts(0, 1, i, 1, 1) = verts(0, 0, i, 3, 1);
+    //     verts(0, 1, i, 1, 2) = verts(0, 0, i, 3, 2);
+    //     verts(0, 1, i, 2, 0) = i * 1.0;
+    //     verts(0, 1, i, 2, 1) = i * 0.2 + 2.25;
+    //     verts(0, 1, i, 2, 2) = 0.0;
+    //     verts(0, 1, i, 3, 0) = i * 1.0 + 1.0;
+    //     verts(0, 1, i, 3, 1) = i * 0.2 + 2.45;
+    //     verts(0, 1, i, 3, 2) = 0.0;
 
-        verts(0, 2, i, 0, 0) = verts(0, 1, i, 2, 0);
-        verts(0, 2, i, 0, 1) = verts(0, 1, i, 2, 1);
-        verts(0, 2, i, 0, 2) = verts(0, 1, i, 2, 2);
-        verts(0, 2, i, 1, 0) = verts(0, 1, i, 3, 0);
-        verts(0, 2, i, 1, 1) = verts(0, 1, i, 3, 1);
-        verts(0, 2, i, 1, 2) = verts(0, 1, i, 3, 2);
-        verts(0, 2, i, 2, 0) = i * 1.0 - 0.1;
-        verts(0, 2, i, 2, 1) = i * 0.2 + 3.25;
-        verts(0, 2, i, 2, 2) = 0.0;
-        verts(0, 2, i, 3, 0) = i * 1.0 + 1.0 - 0.1;
-        verts(0, 2, i, 3, 1) = i * 0.2 + 3.45;
-        verts(0, 2, i, 3, 2) = 0.0;
-    }
-    for (int i = 0; i < nxx; i++)
-    {
-        for (int j = 0; j < nyy; j++)
-        {
-            for (int l = 0; l < 4; l++)
-            {
-                verts(0, j, i, l + 4, 0) = verts(0, j, i, l, 0) + 0.1;
-                verts(0, j, i, l + 4, 1) = verts(0, j, i, l, 1) + 0.1;
-                verts(0, j, i, l + 4, 2) = verts(0, j, i, l, 2) + 0.9;
-            }
-        }
-    }
-    for (int i = 0; i < nxx; i++)
-    {
-        for (int j = 0; j < nyy; j++)
-        {
-            for (int l = 0; l < 4; l++)
-            {
-                verts(1, j, i, l, 0) = verts(0, j, i, l + 4, 0);
-                verts(1, j, i, l, 1) = verts(0, j, i, l + 4, 1);
-                verts(1, j, i, l, 2) = verts(0, j, i, l + 4, 2);
-                verts(1, j, i, l + 4, 0) = verts(1, j, i, l, 0) - 0.1;
-                verts(1, j, i, l + 4, 1) = verts(1, j, i, l, 1) - 0.1;
-            }
-        }
-    }
-    for (int i = 0; i < nxx; i++)
-    {
-        for (int j = 0; j < nyy; j++)
-        {
-            verts(1, j, i, 4, 2) = verts(1, j, i, 0, 2) + 1.0;
-            verts(1, j, i, 5, 2) = verts(1, j, i, 1, 2) + 1.0;
-            verts(1, j, i, 6, 2) = verts(1, j, i, 2, 2) + 1.1;
-            verts(1, j, i, 7, 2) = verts(1, j, i, 3, 2) + 1.1;
-        }
-    }
-    for (int i = 0; i < nxx; i++)
-    {
-        for (int j = 0; j < nyy; j++)
-        {
-            for (int l = 0; l < 4; l++)
-            {
-                verts(2, j, i, l, 0) = verts(1, j, i, l + 4, 0);
-                verts(2, j, i, l, 1) = verts(1, j, i, l + 4, 1);
-                verts(2, j, i, l, 2) = verts(1, j, i, l + 4, 2);
-                verts(2, j, i, l + 4, 0) = verts(2, j, i, l, 0) - 0.1;
-                verts(2, j, i, l + 4, 1) = verts(2, j, i, l, 1) - 0.1;
-            }
-        }
-    }
-    for (int i = 0; i < nxx; i++)
-    {
-        for (int j = 0; j < nyy; j++)
-        {
-            verts(2, j, i, 4, 2) = verts(2, j, i, 0, 2) + 0.9;
-            verts(2, j, i, 5, 2) = verts(2, j, i, 1, 2) + 0.9;
-            verts(2, j, i, 6, 2) = verts(2, j, i, 2, 2) + 0.8;
-            verts(2, j, i, 7, 2) = verts(2, j, i, 3, 2) + 0.8;
-        }
-    }
-
-    // double DX = 1.0;
-    // double DY = 1.0;
-    // double DZ = 1.0;
-    // for (int k = 0; k < nzz; ++k) //�ѿ�������
-    //{
-    //     for (int j = 0; j < nyy; ++j)
+    //     verts(0, 2, i, 0, 0) = verts(0, 1, i, 2, 0);
+    //     verts(0, 2, i, 0, 1) = verts(0, 1, i, 2, 1);
+    //     verts(0, 2, i, 0, 2) = verts(0, 1, i, 2, 2);
+    //     verts(0, 2, i, 1, 0) = verts(0, 1, i, 3, 0);
+    //     verts(0, 2, i, 1, 1) = verts(0, 1, i, 3, 1);
+    //     verts(0, 2, i, 1, 2) = verts(0, 1, i, 3, 2);
+    //     verts(0, 2, i, 2, 0) = i * 1.0 - 0.1;
+    //     verts(0, 2, i, 2, 1) = i * 0.2 + 3.25;
+    //     verts(0, 2, i, 2, 2) = 0.0;
+    //     verts(0, 2, i, 3, 0) = i * 1.0 + 1.0 - 0.1;
+    //     verts(0, 2, i, 3, 1) = i * 0.2 + 3.45;
+    //     verts(0, 2, i, 3, 2) = 0.0;
+    // }
+    // for (int i = 0; i < nxx; i++)
+    // {
+    //     for (int j = 0; j < nyy; j++)
     //     {
-    //         for (int i = 0; i < nxx; ++i)
+    //         for (int l = 0; l < 4; l++)
     //         {
-    //             verts(k, j, i, 0, 0) = i * DX;
-    //             verts(k, j, i, 0, 1) = j * DY;
-    //             verts(k, j, i, 0, 2) = k * DZ;
-    //             verts(k, j, i, 1, 0) = i * DX + DX;
-    //             verts(k, j, i, 1, 1) = j * DY;
-    //             verts(k, j, i, 1, 2) = k * DZ;
-    //             verts(k, j, i, 2, 0) = i * DX;
-    //             verts(k, j, i, 2, 1) = j * DY + DY;
-    //             verts(k, j, i, 2, 2) = k * DZ;
-    //             verts(k, j, i, 3, 0) = i * DX + DX;
-    //             verts(k, j, i, 3, 1) = j * DY + DY;
-    //             verts(k, j, i, 3, 2) = k * DZ;
-    //             verts(k, j, i, 4, 0) = i * DX;
-    //             verts(k, j, i, 4, 1) = j * DY;
-    //             verts(k, j, i, 4, 2) = k * DZ + DZ;
-    //             verts(k, j, i, 5, 0) = i * DX + DX;
-    //             verts(k, j, i, 5, 1) = j * DY;
-    //             verts(k, j, i, 5, 2) = k * DZ + DZ;
-    //             verts(k, j, i, 6, 0) = i * DX;
-    //             verts(k, j, i, 6, 1) = j * DY + DY;
-    //             verts(k, j, i, 6, 2) = k * DZ + DZ;
-    //             verts(k, j, i, 7, 0) = i * DX + DX;
-    //             verts(k, j, i, 7, 1) = j * DY + DY;
-    //             verts(k, j, i, 7, 2) = k * DZ + DZ;
+    //             verts(0, j, i, l + 4, 0) = verts(0, j, i, l, 0) + 0.1;
+    //             verts(0, j, i, l + 4, 1) = verts(0, j, i, l, 1) + 0.1;
+    //             verts(0, j, i, l + 4, 2) = verts(0, j, i, l, 2) + 0.9;
     //         }
     //     }
     // }
+    // for (int i = 0; i < nxx; i++)
+    // {
+    //     for (int j = 0; j < nyy; j++)
+    //     {
+    //         for (int l = 0; l < 4; l++)
+    //         {
+    //             verts(1, j, i, l, 0) = verts(0, j, i, l + 4, 0);
+    //             verts(1, j, i, l, 1) = verts(0, j, i, l + 4, 1);
+    //             verts(1, j, i, l, 2) = verts(0, j, i, l + 4, 2);
+    //             verts(1, j, i, l + 4, 0) = verts(1, j, i, l, 0) - 0.1;
+    //             verts(1, j, i, l + 4, 1) = verts(1, j, i, l, 1) - 0.1;
+    //         }
+    //     }
+    // }
+    // for (int i = 0; i < nxx; i++)
+    // {
+    //     for (int j = 0; j < nyy; j++)
+    //     {
+    //         verts(1, j, i, 4, 2) = verts(1, j, i, 0, 2) + 1.0;
+    //         verts(1, j, i, 5, 2) = verts(1, j, i, 1, 2) + 1.0;
+    //         verts(1, j, i, 6, 2) = verts(1, j, i, 2, 2) + 1.1;
+    //         verts(1, j, i, 7, 2) = verts(1, j, i, 3, 2) + 1.1;
+    //     }
+    // }
+    // for (int i = 0; i < nxx; i++)
+    // {
+    //     for (int j = 0; j < nyy; j++)
+    //     {
+    //         for (int l = 0; l < 4; l++)
+    //         {
+    //             verts(2, j, i, l, 0) = verts(1, j, i, l + 4, 0);
+    //             verts(2, j, i, l, 1) = verts(1, j, i, l + 4, 1);
+    //             verts(2, j, i, l, 2) = verts(1, j, i, l + 4, 2);
+    //             verts(2, j, i, l + 4, 0) = verts(2, j, i, l, 0) - 0.1;
+    //             verts(2, j, i, l + 4, 1) = verts(2, j, i, l, 1) - 0.1;
+    //         }
+    //     }
+    // }
+    // for (int i = 0; i < nxx; i++)
+    // {
+    //     for (int j = 0; j < nyy; j++)
+    //     {
+    //         verts(2, j, i, 4, 2) = verts(2, j, i, 0, 2) + 0.9;
+    //         verts(2, j, i, 5, 2) = verts(2, j, i, 1, 2) + 0.9;
+    //         verts(2, j, i, 6, 2) = verts(2, j, i, 2, 2) + 0.8;
+    //         verts(2, j, i, 7, 2) = verts(2, j, i, 3, 2) + 0.8;
+    //     }
+    // }
+
+    double DX = 1.0;
+    double DY = 1.0;
+    double DZ = 1.0;
+    for (int k = 0; k < nzz; ++k) // �ѿ�������
+    {
+        for (int j = 0; j < nyy; ++j)
+        {
+            for (int i = 0; i < nxx; ++i)
+            {
+                verts(k, j, i, 0, 0) = i * DX;
+                verts(k, j, i, 0, 1) = j * DY;
+                verts(k, j, i, 0, 2) = k * DZ;
+                verts(k, j, i, 1, 0) = i * DX + DX;
+                verts(k, j, i, 1, 1) = j * DY;
+                verts(k, j, i, 1, 2) = k * DZ;
+                verts(k, j, i, 2, 0) = i * DX;
+                verts(k, j, i, 2, 1) = j * DY + DY;
+                verts(k, j, i, 2, 2) = k * DZ;
+                verts(k, j, i, 3, 0) = i * DX + DX;
+                verts(k, j, i, 3, 1) = j * DY + DY;
+                verts(k, j, i, 3, 2) = k * DZ;
+                verts(k, j, i, 4, 0) = i * DX;
+                verts(k, j, i, 4, 1) = j * DY;
+                verts(k, j, i, 4, 2) = k * DZ + DZ;
+                verts(k, j, i, 5, 0) = i * DX + DX;
+                verts(k, j, i, 5, 1) = j * DY;
+                verts(k, j, i, 5, 2) = k * DZ + DZ;
+                verts(k, j, i, 6, 0) = i * DX;
+                verts(k, j, i, 6, 1) = j * DY + DY;
+                verts(k, j, i, 6, 2) = k * DZ + DZ;
+                verts(k, j, i, 7, 0) = i * DX + DX;
+                verts(k, j, i, 7, 1) = j * DY + DY;
+                verts(k, j, i, 7, 2) = k * DZ + DZ;
+            }
+        }
+    }
 
     for (int k = 0; k < nzz; k++)
     {
