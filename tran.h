@@ -922,7 +922,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     double p8[3];
                     _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 2, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), p3);
                     _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 1, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), p5);
-                    _get_centroid(&verts1(k - 1, j, 4, 0, 0), &verts1(k - 1, j, i, 5, 0), &verts1(k - 1, j, i, 6, 0), &verts1(k - 1, j, i, 7, 0), p8);
+                    _get_centroid(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), &verts1(k - 1, j, i, 6, 0), &verts1(k - 1, j, i, 7, 0), p8);
                     // 1,2,4交接边点下标
                     double pp1[3];
                     double pp2[3];
@@ -1264,7 +1264,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     double p9[3];
                     _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 2, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), p3);
                     _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 1, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), p5);
-                    _get_centroid(&verts1(k - 1, j, 4, 0, 0), &verts1(k - 1, j, i, 5, 0), &verts1(k - 1, j, i, 6, 0), &verts1(k - 1, j, i, 7, 0), p8);
+                    _get_centroid(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), &verts1(k - 1, j, i, 6, 0), &verts1(k - 1, j, i, 7, 0), p8);
                     _get_centroid(&verts1(k - 1, j, i - 1, 0, 0), &verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), p6);
                     _get_centroid(&verts1(k - 1, j, i - 1, 4, 0), &verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 6, 0), &verts1(k - 1, j, i - 1, 7, 0), p9);
                     // 1,2,3,4,交接边点下标
@@ -1361,7 +1361,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     Dx0 << p2[0] - _cx(k - 1, j - 1, i - 1), p2[1] - _cy(k - 1, j - 1, i - 1), p2[2] - _cz(k - 1, j - 1, i - 1);
                     Dn610 << n610[0], n610[1], n610[2];
                     double cA0 = Dx0 * matK0.inverse() * Dn610;
-                    cA0 = _dot_product(n6, n610) / cA0;
+                    cA0 = _dot_product(n2, n610) / cA0;
                     double cA = 0.5 * _harmonic(cA1, -cA0);
                     C(i1, i1) += cA;
                     C(i0, i0) += cA;
@@ -1795,7 +1795,6 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     B[i1] -= pb * (r[0] + r[1]);
                     C(i1, i1) += -r[1] + r[2];
                     C(i1, i5) += -r[0] - r[2];
-
                     r = -(v1 + v11) * matK5 * A.bottomRows(3);
                     B[i5] -= pb * (r[0] + r[1]);
                     C(i5, i1) += -r[1] + r[2];
@@ -1988,7 +1987,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     _get_centroid(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 3, 0), &verts1(k, j, i - 1, 5, 0), &verts1(k, j, i - 1, 7, 0), p0);
                     _get_centroid(&verts1(k, j - 1, i - 1, 1, 0), &verts1(k, j - 1, i - 1, 3, 0), &verts1(k, j - 1, i - 1, 5, 0), &verts1(k, j - 1, i - 1, 7, 0), p1);
                     _get_centroid(&verts1(k - 1, j - 1, i - 1, 1, 0), &verts1(k - 1, j - 1, i - 1, 3, 0), &verts1(k - 1, j - 1, i - 1, 5, 0), &verts1(k - 1, j - 1, i - 1, 7, 0), p2);
-                    _get_centroid(&verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 3, 0), &verts1(k - 1, j, i - 1, 5, 0), &verts1(k, j, i - 1, 7, 0), p3);
+                    _get_centroid(&verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 3, 0), &verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 7, 0), p3);
                     _get_centroid(&verts1(k - 1, j, i - 1, 1, 0), &verts1(k - 1, j, i - 1, 0, 0), &verts1(k - 1, j, i - 1, 5, 0), &verts1(k - 1, j, i - 1, 4, 0), p6);
                     _get_centroid(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 5, 0), &verts1(k, j, i - 1, 4, 0), p7);
                     _get_centroid(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 3, 0), &verts1(k, j, i - 1, 2, 0), &verts1(k, j, i - 1, 0, 0), p9);
