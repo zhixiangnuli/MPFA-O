@@ -30,23 +30,23 @@ int main(int argc, char *argv[])
 
     FILE *fp = std::fopen("Qx_MPFA.INC", "w");
     /*_get_2x2(pem);*/
-    for (int divn = 1; divn < 2; divn++)
+    for (int divn = 1; divn <= 8; divn++)
     {
         std::fprintf(fp, "1.1\n");
-        pemx = 1.0;
-        pemy = 1.0;
-        pemz = 1.0;
-        pemxy = 0.0;
-        pemyz = 0.0;
-        pemxz = 0.0;
-        Lamda = 1.0;
+        // pemx = 1.0;
+        // pemy = 1.0;
+        // pemz = 1.0;
+        // pemxy = 0.0;
+        // pemyz = 0.0;
+        // pemxz = 0.0;
+        // Lamda = 1.0;
         _get_3x3(_verts, pem, pemx, pemy, pemz, pemxy, pemyz, pemxz, Lamda);
-        _Outputvtk(_verts, (double *)pem);
-        std::fprintf(fp, "divn = %ld\n", divn);
+        //_Outputvtk(_verts, (double *)pem);
+        // std::fprintf(fp, "divn = %ld\n", divn);
         _get_Qx(pem, _verts, divn, iter, Q);
-        std::fprintf(fp, "iter = %ld\n", iter);
-        std::fprintf(fp, "Q = %le\n", Q);
-        std::fprintf(fp, "/\n");
+        // std::fprintf(fp, "iter = %ld\n", iter);
+        // std::fprintf(fp, "Q = %le\n", Q);
+        // std::fprintf(fp, "/\n");
 
         /*std::fprintf(fp, "1.2\n");
         pemx = 20.0; pemy = 20.0; pemz = 20.0;
@@ -99,13 +99,15 @@ int main(int argc, char *argv[])
     // pemz = 20.0;
     // // pemxy = 2.0; pemyz = 1.0; pemxz = 2.0;
     // Lamda = 10;
-    // _get_3x3(_verts, pem, pemx, pemy, pemz, pemxy, pemyz, pemxz, Lamda);
+    //_get_3x3(_verts, pem, pemx, pemy, pemz, pemxy, pemyz, pemxz, Lamda);
     // std::fprintf(fp, "divn = %ld\n", 16);
-    // _get_Qx(pem, _verts, 16, iter, Q);
+    _get_Qx(pem, _verts, 16, iter, Q);
     // std::fprintf(fp, "iter = %ld\n", iter);
     // std::fprintf(fp, "Q = %le\n", Q);
     // std::fprintf(fp, "/\n");
-
+    _get_Qx(pem, _verts, 32, iter, Q);
+    _get_Qx(pem, _verts, 64, iter, Q);
+    _get_Qx(pem, _verts, 128, iter, Q);
     // std::fprintf(fp, "1.2\n");
     // pemx = 20.0;
     // pemy = 20.0;

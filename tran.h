@@ -715,33 +715,68 @@ void _get_csr(const Ktensor *perm, double *p, int i0, int j0, int k0,
         count = count + 1;
     }
 }
+double &C(int n, int m)
+{
+    for (int idx = Ptr[n]; idx < Ptr[n + 1]; ++idx)
+    {
+        if (Idx[idx] == m)
+        {
+            return Val[idx];
+        }
+    }
+    assert(false);
+    static double zero = 0.0;
+    return zero;
+};
+void MPFA(int i, int j, int k, const enum Axis axi)
+{
+    switch (axi)
+    {
+    case Axis::XPOSITIVE:
+        assert(i < nx);
+        break;
+    case Axis::XNEGATIVE:
+        assert(i > 0);
+        break;
+    case Axis::YPOSITIVE:
+        assert(j < ny);
+        break;
+    case Axis::YNEGATIVE:
+        assert(j > 0);
+        break;
+    case Axis::ZPOSITIVE:
+        assert(k < nz);
+        break;
+    case Axis::ZNEGATIVE:
+        assert(k > 0);
+        break;
+    }
+}
 
 void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, double &Q)
 {
     std::cout << "divn = " << divn << std::endl;
-    int nx = nxx * divn;
-    int ny = nyy * divn;
-    int nz = nzz * divn;
+    nx = nxx * divn;
+    ny = nyy * divn;
+    nz = nzz * divn;
     int n, nnz, count;
-    int i, j, k, iter;
 
-    double *_verts1 = new double[nx * ny * nz * 8 * 3];
-    std::mdspan<double, std::extents<size_t, -1, -1, -1, 8, 3>> verts1(_verts1, nz, ny, nx);
-    Ktensor *pem1 = new Ktensor[nx * ny * nz]();
+    _verts1 = new double[nx * ny * nz * 8 * 3];
+    verts1 = std::mdspan<double, std::extents<size_t, -1, -1, -1, 8, 3>>(_verts1, nz, ny, nx);
+    pem1 = new Ktensor[nx * ny * nz]();
     double *p = new double[nx * ny * nz]();
-    int *Ptr = new int[nx * ny * nz + 1]();
-    int *Idx = new int[27 * nx * ny * nz]();
-    double *Val = new double[27 * nx * ny * nz]();
-    double *B = new double[nx * ny * nz]();
+    Ptr = new int[nx * ny * nz + 1]();
+    Idx = new int[27 * nx * ny * nz]();
+    Val = new double[27 * nx * ny * nz]();
+    B = new double[nx * ny * nz]();
     _get_divide(verts, _verts1, perm, pem1, divn);
+    cx = new double[nx * ny * nz];
+    cy = new double[nx * ny * nz];
+    cz = new double[nx * ny * nz];
 
-    double *cx = new double[nx * ny * nz];
-    double *cy = new double[nx * ny * nz];
-    double *cz = new double[nx * ny * nz];
-
-    std::mdspan _cx(cx, nz, ny, nx);
-    std::mdspan _cy(cy, nz, ny, nx);
-    std::mdspan _cz(cz, nz, ny, nx);
+    _cx = std::mdspan(cx, nz, ny, nx);
+    _cy = std::mdspan(cy, nz, ny, nx);
+    _cz = std::mdspan(cz, nz, ny, nx);
 
     /*double para_8[8];
     int idx_8[8];
@@ -809,23 +844,10 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
             }
         }
     }
-    auto C = [&](int n, int m) -> double &
-    {
-        for (int idx = Ptr[n]; idx < Ptr[n + 1]; ++idx)
-        {
-            if (Idx[idx] == m)
-            {
-                return Val[idx];
-            }
-        }
-        assert(false);
-        static double zero = 0.0;
-        return zero;
-    };
     double pb = 0.0;
-    for (k = 0; k <= nz; k++)
-        for (j = 0; j <= ny; j++)
-            for (i = 0; i <= nx; i++)
+    for (int k = 0; k <= nz; k++)
+        for (int j = 0; j <= ny; j++)
+            for (int i = 0; i <= nx; i++)
             {
                 int cur = k * nx * ny + j * nx + i;
                 // 边界网格的边界压力

@@ -32,7 +32,21 @@ constexpr double epsilonP = 1.0e-6, residual = 0.0001;
 // constexpr double tolpem = pem0 + 1.0;
 constexpr int nxx = 3, nyy = 3, nzz = 3; // ϸ��ǰ
 // constexpr int nxx = 10, nyy = 9, nzz = 8;                          //ϸ��ǰ
-
+int nx, ny, nz;
+struct Ktensor;
+Ktensor *pem1;
+double *_verts1;
+int *Ptr;
+int *Idx;
+double *Val;
+double *B;
+double *cx;
+double *cy;
+double *cz;
+std::mdspan<double, std::extents<size_t, -1, -1, -1, 8, 3>> verts1;
+std::mdspan<double, std::extents<size_t, -1, -1, -1>> _cx;
+std::mdspan<double, std::extents<size_t, -1, -1, -1>> _cy;
+std::mdspan<double, std::extents<size_t, -1, -1, -1>> _cz;
 enum class Axis // Determine the positive or negative of a certain coordinate value of the
                 // direction vector
 {
