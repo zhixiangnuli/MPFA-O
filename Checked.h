@@ -726,3 +726,45 @@ void _get_surface_normal(const double *p1, const double *p2, const double *p3, c
         break;
     }
 }
+void _get_triangle_normal(const double *p1, const double *p2, const double *p3, double *n, const enum Axis axi)
+{
+    double v1[3], v2[3];
+    _vectorize(p1, p2, v1);
+    _vectorize(p1, p3, v2);
+    _cross_product(v1, v2, n);
+    for (int i = 0; i < 3; ++i)
+    {
+        n[i] /= 2.0;
+    }
+    switch (axi)
+    {
+    case Axis::XPOSITIVE:
+        if (n[0] < 0)
+            _get_reverse(n);
+        break;
+    case Axis::XNEGATIVE:
+        if (n[0] > 0)
+            _get_reverse(n);
+        break;
+    case Axis::YPOSITIVE:
+        if (n[1] < 0)
+            _get_reverse(n);
+        break;
+    case Axis::YNEGATIVE:
+        if (n[1] > 0)
+            _get_reverse(n);
+        break;
+    case Axis::ZPOSITIVE:
+        if (n[2] < 0)
+            _get_reverse(n);
+        break;
+    case Axis::ZNEGATIVE:
+        if (n[2] > 0)
+            _get_reverse(n);
+        break;
+    }
+}
+double _get_ratio(const double *n, const double *t)
+{
+    return _dot_product(n, t) / _dot_product(n, n);
+}
