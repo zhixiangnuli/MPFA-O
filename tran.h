@@ -8053,24 +8053,90 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
             std::cout << std::endl;
         }
     };
-    double pb = 0.0;
+    // for (int k = 0; k <= nz; k++)
+    //     for (int j = 0; j <= ny; j++)
+    //         for (int i = 0; i <= nx; i++)
+    //         {
+    //             if (i > 0)
+    //                 MPFA(i, j, k, Axis::XNEGATIVE);
+    //             if (i < nx)
+    //                 MPFA(i, j, k, Axis::XPOSITIVE);
+    //             if (j > 0)
+    //                 MPFA(i, j, k, Axis::YNEGATIVE);
+    //             if (j < ny)
+    //                 MPFA(i, j, k, Axis::YPOSITIVE);
+    //             if (k > 0)
+    //                 MPFA(i, j, k, Axis::ZNEGATIVE);
+    //             if (k < nz)
+    //                 MPFA(i, j, k, Axis::ZPOSITIVE);
+    //         }
     for (int k = 0; k <= nz; k++)
         for (int j = 0; j <= ny; j++)
-            for (int i = 0; i <= nx; i++)
-            {
-                if (i > 0)
-                    MPFA(i, j, k, Axis::XNEGATIVE);
-                if (i < nx)
+            for (int i = 0; i < nx; i++)
+                if (j == 0 || j == ny || k == 0 || k == nz)
+                {
                     MPFA(i, j, k, Axis::XPOSITIVE);
-                if (j > 0)
-                    MPFA(i, j, k, Axis::YNEGATIVE);
-                if (j < ny)
-                    MPFA(i, j, k, Axis::YPOSITIVE);
-                if (k > 0)
-                    MPFA(i, j, k, Axis::ZNEGATIVE);
-                if (k < nz)
-                    MPFA(i, j, k, Axis::ZPOSITIVE);
-            }
+                    MPFA(i + 1, j, k, Axis::XNEGATIVE);
+                }
+                else
+                {
+                    int idx[4];
+                    idx[0] = (k - 1) * nx * ny + (j - 1) * nx + i;
+                    idx[1] = (k - 1) * nx * ny + j * nx + i;
+                    idx[2] = k * nx * ny + j * nx + i;
+                    idx[3] = k * nx * ny + (j - 1) * nx + i;
+                    // 柱坐标，l,r,angle
+                    double new_o[3], new_x[3], new_y[3], new_z[3];
+                    _get_midpoint(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), new_o);
+                    _get_normalized(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), new_x);
+                    double pc[4][3];
+                    _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 1, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), pc[0]);
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 3, 0), pc[1]);
+                    _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 5, 0), pc[2]);
+                    _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 1, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), pc[3]);
+                    // 求l->求r
+                    double l[4];
+                    double r[4];
+                    double temp[3];
+                    for (int q = 0; q < 4; ++q)
+                    {
+                        _vectorize(new_o, pc[q], temp);
+                        l[q] = _dot_product(temp, new_x);
+                        r[q] = std::sqrt(_l2norm(temp) * _l2norm(temp) - l[q] * l[q]);
+                    }
+                    // 先求新坐标轴，再求angle
+                    _vectorize(new_o, pc[3], new_y);
+                    _cross_product(new_y, new_x, new_z);
+                    _get_normalized(new_z);
+                    _cross_product(new_z, new_x, new_y);
+                    double angle[4];
+                    angle[3] = -Pi;
+                    for (int q = 0; q < 3; ++q)
+                    {
+                        _vectorize(new_o, pc[q], temp);
+                        _get_angle(new_y, new_z, temp, r[q], angle[q]);
+                    }
+                    // 渗透率张量变换，变换矩阵为正交矩阵
+                    Eigen::Matrix3d J, matK[4];
+                    J << new_x[0], new_x[1], new_x[2],
+                        new_y[0], new_y[1], new_y[2],
+                        new_z[0], new_z[1], new_z[2];
+                    for (int q = 0; q < 4; ++q)
+                    {
+                        _get_matK(pem1[idx[q]], matK[q]);
+                        matK[q] = J * matK[q] * J.transpose();
+                    }
+                    double alpha = 0.0;
+                    Eigen::Matrix2d K[4];
+                    for (int q = 0; q < 4; ++q)
+                        K[q] = matK[q].block(1, 1, 2, 2);
+                    FAM(idx, _get_distance(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0)), l, r, angle, K, alpha);
+                    if (alpha == 0.0 || alpha > 0.99)
+                    {
+                        MPFA(i, j, k, Axis::XPOSITIVE);
+                        MPFA(i + 1, j, k, Axis::XNEGATIVE);
+                    }
+                }
     pmgmres_ilu_cr(nx * ny * nz, nnz, Ptr, Idx, Val, p, B, 1000, 1000, 1e-5, 1e-5);
     Q = 0;
     for (int i = 0; i <= 0; ++i)

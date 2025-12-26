@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <math.h>
-
+#include <complex>
 #include <iomanip>
 #include <algorithm>
 #include <cassert>
@@ -18,7 +18,6 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <mkl.h>
-
 namespace std
 {
     using std::experimental::extents;
@@ -767,4 +766,130 @@ void _get_triangle_normal(const double *p1, const double *p2, const double *p3, 
 double _get_ratio(const double *n, const double *t)
 {
     return _dot_product(n, t) / _dot_product(n, n);
+}
+void _get_angle(const double *Axis_x, const double *Axis_y, const double *v, const double r, double &ang)
+{
+    ang = std::acos(_dot_product(Axis_x, v) / r);
+    if (_dot_product(Axis_y, v) < 0.0)
+        ang = -ang;
+}
+
+void FAM(int *idx, const double lz, const double *l, const double *r, const double *angle, const Eigen::Matrix2d *K, double &alpha)
+{
+    std::complex<double> c[4];
+    for (int i = 0; i < 4; ++i)
+    {
+        c[i].real(-K[i](0, 1) / K[i](1, 1));
+        c[i].imag(std::sqrt(K[i](0, 0) * K[i](1, 1) - K[i](0, 1) * K[i](1, 0)) / K[i](1, 1));
+    }
+    std::complex<double> zj[3], zj1[3];
+    double rj[3], rj1[3], theta[4], theta1[3];
+    for (int i = 0; i < 3; ++i)
+    {
+        zj[i] = cos(angle[i]) + c[i] * sin(angle[i]);
+        zj1[i] = cos(angle[i]) + c[i + 1] * sin(angle[i]);
+        rj[i] = std::abs(zj[i]);
+        rj1[i] = std::abs(zj1[i]);
+        theta[i] = std::arg(zj[i]);
+        theta1[i] = std::arg(zj1[i]);
+    }
+    Eigen::Matrix<double, 8, 8, Eigen::RowMajor> M;
+    M.setZero();
+    auto calculation_M = [&]() -> void
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            M(2 * i, 2 * i) = std::pow(rj[i], 1 - alpha) * cos((1 - alpha) * theta[i]);
+            M(2 * i, 2 * i + 1) = -std::pow(rj[i], 1 - alpha) * sin((1 - alpha) * theta[i]);
+            M(2 * i, 2 * i + 2) = -std::pow(rj1[i], 1 - alpha) * cos((1 - alpha) * theta1[i]);
+            M(2 * i, 2 * i + 3) = std::pow(rj1[i], 1 - alpha) * sin((1 - alpha) * theta1[i]);
+            M(2 * i + 1, 2 * i) = std::pow(rj[i], -alpha) * ((-sin(angle[i]) * K[i](0, 0) + cos(angle[i]) * K[i](0, 1)) * cos(alpha * theta[i]) + (-sin(angle[i]) * K[i](1, 0) + cos(angle[i]) * K[i](1, 1)) * (cos(alpha * theta[i]) * c[i].real() + sin(alpha * theta[i]) * c[i].imag()));
+            M(2 * i + 1, 2 * i + 1) = std::pow(rj[i], -alpha) * ((-sin(angle[i]) * K[i](0, 0) + cos(angle[i]) * K[i](0, 1)) * sin(alpha * theta[i]) + (-sin(angle[i]) * K[i](1, 0) + cos(angle[i]) * K[i](1, 1)) * (sin(alpha * theta[i]) * c[i].real() - cos(alpha * theta[i]) * c[i].imag()));
+            M(2 * i + 1, 2 * i + 2) = -std::pow(rj1[i], -alpha) * ((-sin(angle[i]) * K[i + 1](0, 0) + cos(angle[i]) * K[i + 1](0, 1)) * cos(alpha * theta1[i]) + (-sin(angle[i]) * K[i + 1](1, 0) + cos(angle[i]) * K[i + 1](1, 1)) * (cos(alpha * theta1[i]) * c[i + 1].real() + sin(alpha * theta1[i]) * c[i + 1].imag()));
+            M(2 * i + 1, 2 * i + 3) = -std::pow(rj1[i], -alpha) * ((-sin(angle[i]) * K[i + 1](0, 0) + cos(angle[i]) * K[i + 1](0, 1)) * sin(alpha * theta1[i]) + (-sin(angle[i]) * K[i + 1](1, 0) + cos(angle[i]) * K[i + 1](1, 1)) * (sin(alpha * theta1[i]) * c[i + 1].real() - cos(alpha * theta1[i]) * c[i + 1].imag()));
+        }
+        M(6, 6) = cos((1 - alpha) * Pi);
+        M(6, 7) = -sin((1 - alpha) * Pi);
+        M(6, 0) = -cos((1 - alpha) * Pi);
+        M(6, 1) = -sin((1 - alpha) * Pi);
+        M(7, 6) = -K[3](0, 1) * cos(alpha * Pi) - K[3](1, 1) * (cos(alpha * Pi) * c[3].real() + sin(alpha * Pi) * c[3].imag());
+        M(7, 7) = -K[3](1, 0) * sin(alpha * Pi) - K[3](1, 1) * (sin(alpha * Pi) * c[3].real() - cos(alpha * Pi) * c[3].imag());
+        M(7, 0) = K[0](0, 1) * cos(alpha * Pi) + K[0](1, 1) * (cos(alpha * Pi) * c[0].real() - sin(alpha * Pi) * c[0].imag());
+        M(7, 1) = -K[0](1, 0) * sin(alpha * Pi) - K[0](1, 1) * (sin(alpha * Pi) * c[0].real() + cos(alpha * Pi) * c[0].imag());
+    };
+    const auto _nullspace = [](const double *mat, double *x, int m) -> void
+    {
+        const int n = m * m;
+        assert(n > 0);
+
+        double *bak = new double[n];
+        dlacpy("N", &m, &m, mat, &m, bak, &m);
+
+        const int t = m * 5;
+        const int l = 1;
+
+        double *s = new double[m];
+        double *u = new double[n];
+        double *v = new double[n];
+        double *w = new double[t];
+
+        const double r = dnrm2(&n, bak, &l);
+        const double e = m * (std::nextafter(r, std::numeric_limits<double>::max()) - r);
+        assert(e > 0.0);
+
+        int err = 0;
+        dgesvd("S", "S", &m, &m, bak, &m, s, u, &m, v, &m, w, &t, &err);
+        dcopy(&m, v + m - 1, &m, x, &l);
+        assert(err == 0);
+
+        delete[] s;
+        delete[] u;
+        delete[] v;
+        delete[] w;
+    };
+    double delta = 1.0e-4;
+    double left = 0.0, right = 0.0, mid = 0.0;
+    double lefta = 0.0, righta = 0.0, mida = 0.0;
+    for (double x = 0.0; x <= 1.0 - delta; x += delta)
+    {
+        alpha = x;
+        lefta = alpha;
+        calculation_M();
+        left = M.determinant();
+        if (abs(left) < 1.0e-6)
+            break;
+        righta = alpha = x + delta;
+        calculation_M();
+        right = M.determinant();
+        if (abs(right) < 1.0e-6)
+            break;
+        if (left * right < 0.0)
+        {
+            for (int iter = 0; iter < 60; iter++)
+            {
+                mida = alpha = (lefta + righta) / 2.0;
+                calculation_M();
+                mid = M.determinant();
+                if (abs(mid) < 1.0e-6)
+                    break;
+                else if (mid * left < 0)
+                {
+                    righta = mida;
+                    right = mid;
+                }
+                else
+                {
+                    lefta = mida;
+                    left = mid;
+                }
+            }
+            break;
+        }
+    }
+    if (alpha > 0.0 && alpha <= 0.99)
+    {
+        M.transposeInPlace();
+        double null[8];
+        _nullspace(M.data(), null, 8);
+    }
 }
