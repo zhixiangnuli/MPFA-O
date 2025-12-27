@@ -8096,7 +8096,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 1, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), pc[3]);
                     // 求l->求r
                     double l[4];
-                    double r[4];
+                    double r[4], r_p[4];
                     double temp[3];
                     for (int q = 0; q < 4; ++q)
                     {
@@ -8109,7 +8109,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     _cross_product(new_y, new_x, new_z);
                     _get_normalized(new_z);
                     _cross_product(new_z, new_x, new_y);
-                    double angle[4];
+                    double angle[4], angle_p[4];
                     angle[3] = -Pi;
                     for (int q = 0; q < 3; ++q)
                     {
@@ -8121,6 +8121,23 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     J << new_x[0], new_x[1], new_x[2],
                         new_y[0], new_y[1], new_y[2],
                         new_z[0], new_z[1], new_z[2];
+                    Eigen::RowVector3d p_o;
+                    p_o << _cx(k - 1, j - 1, i) - new_o[0], _cy(k - 1, j - 1, i) - new_o[1], _cz(k - 1, j - 1, i) - new_o[2];
+                    p_o *= J.transpose();
+                    r_p[0] = std::sqrt(p_o(1) * p_o(1) + p_o(2) * p_o(2));
+                    _get_angle(p_o[1], p_o[2], r_p[0], angle_p[0]);
+                    p_o << _cx(k - 1, j, i) - new_o[0], _cy(k - 1, j, i) - new_o[1], _cz(k - 1, j, i) - new_o[2];
+                    p_o *= J.transpose();
+                    r_p[1] = std::sqrt(p_o(1) * p_o(1) + p_o(2) * p_o(2));
+                    _get_angle(p_o[1], p_o[2], r_p[1], angle_p[1]);
+                    p_o << _cx(k, j, i) - new_o[0], _cy(k, j, i) - new_o[1], _cz(k, j, i) - new_o[2];
+                    p_o *= J.transpose();
+                    r_p[2] = std::sqrt(p_o(1) * p_o(1) + p_o(2) * p_o(2));
+                    _get_angle(p_o[1], p_o[2], r_p[2], angle_p[2]);
+                    p_o << _cx(k, j - 1, i) - new_o[0], _cy(k, j - 1, i) - new_o[1], _cz(k, j - 1, i) - new_o[2];
+                    p_o *= J.transpose();
+                    r_p[3] = std::sqrt(p_o(1) * p_o(1) + p_o(2) * p_o(2));
+                    _get_angle(p_o[1], p_o[2], r_p[3], angle_p[3]);
                     for (int q = 0; q < 4; ++q)
                     {
                         _get_matK(pem1[idx[q]], matK[q]);
@@ -8130,7 +8147,7 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     Eigen::Matrix2d K[4];
                     for (int q = 0; q < 4; ++q)
                         K[q] = matK[q].block(1, 1, 2, 2);
-                    FAM(idx, _get_distance(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0)), l, r, angle, K, alpha);
+                    FAM(idx, _get_distance(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0)), l, r, angle, K, alpha, r_p, angle_p);
                     if (alpha == 0.0 || alpha > 0.99)
                     {
                         MPFA(i, j, k, Axis::XPOSITIVE);

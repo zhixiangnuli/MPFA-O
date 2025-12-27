@@ -773,8 +773,14 @@ void _get_angle(const double *Axis_x, const double *Axis_y, const double *v, con
     if (_dot_product(Axis_y, v) < 0.0)
         ang = -ang;
 }
+void _get_angle(const double x, const double y, const double r, double &ang)
+{
+    ang = std::acos(x / r);
+    if (y < 0.0)
+        ang = -ang;
+}
 
-void FAM(int *idx, const double lz, const double *l, const double *r, const double *angle, const Eigen::Matrix2d *K, double &alpha)
+void FAM(int *idx, const double lz, const double *l, const double *r, const double *angle, const Eigen::Matrix2d *K, double &alpha, const double *r_p, const double *angle_p)
 {
     std::complex<double> c[4];
     for (int i = 0; i < 4; ++i)
@@ -782,8 +788,8 @@ void FAM(int *idx, const double lz, const double *l, const double *r, const doub
         c[i].real(-K[i](0, 1) / K[i](1, 1));
         c[i].imag(std::sqrt(K[i](0, 0) * K[i](1, 1) - K[i](0, 1) * K[i](1, 0)) / K[i](1, 1));
     }
-    std::complex<double> zj[3], zj1[3];
-    double rj[3], rj1[3], theta[4], theta1[3];
+    std::complex<double> zj[3], zj1[3], zp[4];
+    double rj[3], rj1[3], rp[4], theta[4], theta1[3], thetap[4];
     for (int i = 0; i < 3; ++i)
     {
         zj[i] = cos(angle[i]) + c[i] * sin(angle[i]);
@@ -792,6 +798,12 @@ void FAM(int *idx, const double lz, const double *l, const double *r, const doub
         rj1[i] = std::abs(zj1[i]);
         theta[i] = std::arg(zj[i]);
         theta1[i] = std::arg(zj1[i]);
+    }
+    for (int i = 0; i < 4; ++i)
+    {
+        zp[i] = cos(angle_p[i]) + c[i] * sin(angle_p[i]);
+        rp[i] = std::abs(zp[i]);
+        thetap[i] = std::arg(zp[i]);
     }
     Eigen::Matrix<double, 8, 8, Eigen::RowMajor> M;
     M.setZero();
@@ -889,7 +901,33 @@ void FAM(int *idx, const double lz, const double *l, const double *r, const doub
     if (alpha > 0.0 && alpha <= 0.99)
     {
         M.transposeInPlace();
-        double null[8];
+        double null[8], lamdap[4];
         _nullspace(M.data(), null, 8);
+        M.transposeInPlace();
+        for (int q = 0; q < 4; ++q)
+            lamdap[q] = 2.0 * std::pow(r_p[q] * rp[q], 1.0 - alpha) * (null[2 * q] * cos((1.0 - alpha) * thetap[q]) - null[2 * q + 1] * sin((1.0 - alpha) * thetap[q]));
+        auto C = [&](int n, int m) -> double &
+        {
+            for (int idx = Ptr[n]; idx < Ptr[n + 1]; ++idx)
+            {
+                if (Idx[idx] == m)
+                {
+                    return Val[idx];
+                }
+            }
+            assert(false);
+            static double zero = 0.0;
+            return zero;
+        };
+        for (int q = 0; q < 4; ++q)
+        { // q+1->q的流量
+            double lamda = null[2 * q] * M(2 * q + 1, 2 * q) + null[2 * q + 1] * M(2 * q + 1, 2 * q + 1);
+            lamda *= 2.0 * lz * std::pow(r[q], 1.0 - alpha) / (2.0 - alpha);
+            lamda /= (lamdap[(q + 1) % 4] - lamdap[q]);
+            C(idx[q], idx[q]) -= lamda;
+            C(idx[q], idx[(q + 1) % 4]) += lamda;
+            C(idx[(q + 1) % 4], idx[(q + 1) % 4]) -= lamda;
+            C(idx[(q + 1) % 4], idx[q]) += lamda;
+        }
     }
 }

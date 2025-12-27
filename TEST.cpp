@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     FILE *fp = std::fopen("Qx_MPFA.INC", "w");
     /*_get_2x2(pem);*/
-    for (int divn = 1; divn <= 8; divn++)
+    for (int divn = 1; divn <= 1; divn++)
     {
         std::fprintf(fp, "1.1\n");
         // pemx = 1.0;
