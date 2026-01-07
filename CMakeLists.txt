@@ -15,3 +15,8 @@ target_include_directories(Tensor_MPFA SYSTEM PUBLIC
 target_link_libraries(Tensor_MPFA PRIVATE
 	MKL::MKL
 )
+if (MSVC)
+  set_source_files_properties(TEST.cpp PROPERTIES
+    COMPILE_OPTIONS "$<$<CONFIG:Release>:/GL->;$<$<CONFIG:Release>:/O2>;$<$<CONFIG:Release>:/Ob0>"
+  )
+endif()
