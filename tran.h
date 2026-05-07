@@ -7525,57 +7525,54 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
     nnz = 0;
     Ptr[0] = 0;
     for (int k = 0; k < nz; k++)
-    {
         for (int j = 0; j < ny; j++)
-        {
             for (int i = 0; i < nx; i++)
             {
+                int cur = k * nx * ny + j * nx + i;
                 count = 0;
-                for (int z = -1; z <= 1; ++z)
-                    for (int y = -1; y <= 1; ++y)
-                        for (int x = -1; x <= 1; ++x)
-                        {
-                            int ii = k + z;
-                            int jj = j + y;
-                            int ii_ = i + x;
-                            if (ii >= 0 && ii < nz && jj >= 0 && jj < ny && ii_ >= 0 && ii_ < nx)
-                            {
-                                Idx[nnz] = ii * nx * ny + jj * nx + ii_;
-                                nnz++;
-                                count++;
-                            }
-                        }
+                if (k > 0)
+                {
+                    Idx[nnz] = cur - nx * ny;
+                    nnz++;
+                    count++;
+                }
+                if (j > 0)
+                {
+                    Idx[nnz] = cur - nx;
+                    nnz++;
+                    count++;
+                }
+                if (i > 0)
+                {
+                    Idx[nnz] = cur - 1;
+                    nnz++;
+                    count++;
+                }
+                Idx[nnz] = cur;
+                nnz++;
+                count++;
+                if (i < nx - 1)
+                {
+                    Idx[nnz] = cur + 1;
+                    nnz++;
+                    count++;
+                }
+                if (j < ny - 1)
+                {
+                    Idx[nnz] = cur + nx;
+                    nnz++;
+                    count++;
+                }
+                if (k < nz - 1)
+                {
+                    Idx[nnz] = cur + nx * ny;
+                    nnz++;
+                    count++;
+                }
                 Ptr[n + 1] = Ptr[n] + count;
                 ++n;
             }
-        }
-    }
-    auto print_func = [&]() -> void
-    {
-        for (int l = 0; l < n; ++l)
-        {
-            for (int m = Ptr[l]; m < Ptr[l + 1]; ++m)
-                std::cout << Val[m] << " ";
-            std::cout << std::endl;
-        }
-    };
-    // for (int k = 0; k <= nz; k++)
-    //     for (int j = 0; j <= ny; j++)
-    //         for (int i = 0; i <= nx; i++)
-    //         {
-    //             if (i > 0)
-    //                 MPFA(i, j, k, Axis::XNEGATIVE);
-    //             if (i < nx)
-    //                 MPFA(i, j, k, Axis::XPOSITIVE);
-    //             if (j > 0)
-    //                 MPFA(i, j, k, Axis::YNEGATIVE);
-    //             if (j < ny)
-    //                 MPFA(i, j, k, Axis::YPOSITIVE);
-    //             if (k > 0)
-    //                 MPFA(i, j, k, Axis::ZNEGATIVE);
-    //             if (k < nz)
-    //                 MPFA(i, j, k, Axis::ZPOSITIVE);
-    //         }
+
     for (int k = 0; k <= nz; k++)
         for (int j = 0; j < ny; j++)
             for (int i = 0; i <= nx; i++)
@@ -8339,210 +8336,6 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                 }
             }
     std::cout << "Q= " << Q << std::endl;
-    // for (iter = 0; iter < 100; iter++)
-    // {
-    //     n = 0;
-    //     nnz = 0;
-    //     Ptr[0] = 0;
-
-    //     /*for (int i = 0; i < 27; i++) {
-    //         std::cout << beta[i][0] << " " << beta[i][1] << " " << beta[i][2] << "\n";
-    //     }*/
-
-    //     std::cout << "iter=" << iter << "\n";
-    //     for (k = 0; k < nz; k++)
-    //     {
-    //         for (j = 0; j < ny; j++)
-    //         {
-    //             for (i = 0; i < nx; i++)
-    //             {
-    //                 // i = 1; j = 1; k = 1;
-    //                 // std::cout << "(" << i << "," << j << "," << k << ") : ";
-    //                 count = 0;
-    //                 double val = 0.0;
-    //                 double F = 0.0;
-    //                 double F1 = 0.0;
-    //                 int i0 = k * nx * ny + j * nx + i;
-
-    //                 _get_F(pem1, p, i, j, k, _verts1, F, divn);
-    //                 // std::cout << "F=" << F << std::endl;
-
-    //                 B[n] = -F;
-    //                 if (k > 0)
-    //                 {
-    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i, j, k - 1, Idx, Val, nnz, count, divn);
-
-    //                     if (i > 0)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j, k - 1, Idx, Val, nnz, count, divn);
-
-    //                         if (j > 0)
-    //                         {
-    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j - 1, k - 1, Idx, Val, nnz, count, divn);
-    //                         }
-    //                         if (j < ny - 1)
-    //                         {
-    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j + 1, k - 1, Idx, Val, nnz, count, divn);
-    //                         }
-    //                     }
-    //                     if (i < nx - 1)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j, k - 1, Idx, Val, nnz, count, divn);
-
-    //                         if (j > 0)
-    //                         {
-    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j - 1, k - 1, Idx, Val, nnz, count, divn);
-    //                         }
-    //                         if (j < ny - 1)
-    //                         {
-    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j + 1, k - 1, Idx, Val, nnz, count, divn);
-    //                         }
-    //                     }
-    //                     if (j > 0)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i, j - 1, k - 1, Idx, Val, nnz, count, divn);
-    //                     }
-    //                     if (j < ny - 1)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i, j + 1, k - 1, Idx, Val, nnz, count, divn);
-    //                     }
-    //                 }
-
-    //                 if (j > 0)
-    //                 {
-    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i, j - 1, k, Idx, Val, nnz, count, divn);
-    //                 }
-    //                 if (i > 0)
-    //                 {
-    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j, k, Idx, Val, nnz, count, divn);
-
-    //                     if (j > 0)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j - 1, k, Idx, Val, nnz, count, divn);
-    //                     }
-    //                     if (j < ny - 1)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j + 1, k, Idx, Val, nnz, count, divn);
-    //                     }
-    //                 }
-    //                 _get_csr(pem1, p, i, j, k, _verts1, F, i, j, k, Idx, Val, nnz, count, divn);
-    //                 if (i < nx - 1)
-    //                 {
-    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j, k, Idx, Val, nnz, count, divn);
-
-    //                     if (j > 0)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j - 1, k, Idx, Val, nnz, count, divn);
-    //                     }
-    //                     if (j < ny - 1)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j + 1, k, Idx, Val, nnz, count, divn);
-    //                     }
-    //                 }
-    //                 if (j < ny - 1)
-    //                 {
-    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i, j + 1, k, Idx, Val, nnz, count, divn);
-    //                 }
-
-    //                 if (k < nz - 1)
-    //                 {
-    //                     _get_csr(pem1, p, i, j, k, _verts1, F, i, j, k + 1, Idx, Val, nnz, count, divn);
-
-    //                     if (i > 0)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j, k + 1, Idx, Val, nnz, count, divn);
-
-    //                         if (j > 0)
-    //                         {
-    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j - 1, k + 1, Idx, Val, nnz, count, divn);
-    //                         }
-    //                         if (j < ny - 1)
-    //                         {
-    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i - 1, j + 1, k + 1, Idx, Val, nnz, count, divn);
-    //                         }
-    //                     }
-    //                     if (i < nx - 1)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j, k + 1, Idx, Val, nnz, count, divn);
-
-    //                         if (j > 0)
-    //                         {
-    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j - 1, k + 1, Idx, Val, nnz, count, divn);
-    //                         }
-    //                         if (j < ny - 1)
-    //                         {
-    //                             _get_csr(pem1, p, i, j, k, _verts1, F, i + 1, j + 1, k + 1, Idx, Val, nnz, count, divn);
-    //                         }
-    //                     }
-    //                     if (j > 0)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i, j - 1, k + 1, Idx, Val, nnz, count, divn);
-    //                     }
-    //                     if (j < ny - 1)
-    //                     {
-    //                         _get_csr(pem1, p, i, j, k, _verts1, F, i, j + 1, k + 1, Idx, Val, nnz, count, divn);
-    //                     }
-    //                 }
-    //                 Ptr[n + 1] = Ptr[n] + count;
-
-    //                 n = n + 1;
-    //                 // std::cout << std::endl;
-    //             }
-    //         }
-    //     }
-
-    //     // FILE* fp = std::fopen("Val_MPFA.INC", "w");
-    //     // for (int ii = 0; ii < nnz; ii++) {
-    //     //     std::fprintf(fp, "%le\n", Val[ii]);
-    //     // }
-    //     // std::fclose(fp);
-
-    //     pmgmres_ilu_cr(nx * ny * nz, nnz, Ptr, Idx, Val, x, B, 1000, 1000, 1e-5, 1e-5);
-
-    //     double res = 0.0;
-
-    //     for (int i = 0; i < nx * ny * nz; ++i)
-    //     {
-    //         if (std::abs(x[i]) > res)
-    //             res = std::abs(x[i]);
-    //     }
-
-    //     for (int i = 0; i < nx * ny * nz; ++i)
-    //     {
-    //         p[i] += x[i];
-    //     }
-
-    //     Q = 0.0;
-    //     for (int k = 0; k < nz; k++)
-    //     {
-    //         for (int j = 0; j < ny; j++)
-    //         {
-    //             const double *pp[4];
-    //             double S = 0.0, D = 0.0;
-    //             double pc[3];
-    //             int i0 = k * nx * ny + j * nx + nx - 1;
-
-    //             pp[0] = &verts1(k, j, nx - 1, 1, 0);
-    //             pp[1] = &verts1(k, j, nx - 1, 3, 0);
-    //             pp[2] = &verts1(k, j, nx - 1, 5, 0);
-    //             pp[3] = &verts1(k, j, nx - 1, 7, 0);
-
-    //             pc[0] = _cx(k, j, nx - 1);
-    //             pc[1] = _cy(k, j, nx - 1);
-    //             pc[2] = _cz(k, j, nx - 1);
-
-    //             S = _get_area(pp[0], pp[1], pp[2]) + _get_area(pp[3], pp[1], pp[2]);
-    //             D = _get_distance(pc, pp[1], pp[2], pp[3]);
-    //             Q = Q + (Phigh - p[i0]) * S / D * pem1[i0].x;
-    //         }
-    //     }
-
-    //     Iter = iter;
-    //     std::cout << "Q=" << Q << "\n";
-    //     std::cout << "res=" << res << "\n";
-    //     if (res < 1.0e-3)
-    //         break;
-    // }
     delete[] pem1, p, Ptr, Idx, Val, B, _verts1, cx, cy, cz;
     std::cout << std::endl;
 }
