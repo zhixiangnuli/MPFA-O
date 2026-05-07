@@ -29,7 +29,7 @@ constexpr double Plow = 0.0, Phigh = 1.0;
 constexpr double epsilonP = 1.0e-6, residual = 0.0001;
 // constexpr double pem0 = 300.0;
 // constexpr double tolpem = pem0 + 1.0;
-constexpr int nxx = 3, nyy = 3, nzz = 3; // ϸ��ǰ
+constexpr int nxx = 50, nyy = 30, nzz = 1; // ϸ��ǰ
 // constexpr int nxx = 10, nyy = 9, nzz = 8;                          //ϸ��ǰ
 int nx, ny, nz;
 struct Ktensor;
@@ -479,239 +479,42 @@ void _get_3x3(double *_verts, Ktensor *pem, double pemx,
 
     // 首先，定义网格尺寸
     double M_PI = Pi;
-
+    double DX = 1.0;
+    double DY = 1.0;
+    double DZ = 1.0;
+    for (int k = 0; k < nzz; ++k) // �ѿ�������
     {
-
-        // 定义网格节点坐标 (尺寸为(nzz+1) × (nyy+1) × (nxx+1))
-        vector<vector<vector<Point3D>>> grid_nodes(nzz + 1,
-                                                   vector<vector<Point3D>>(nyy + 1,
-                                                                           vector<Point3D>(nxx + 1)));
-
-        // 定义顶层和底层控制点
-        vector<vector<Point3D>> top_control_points(nyy + 1, vector<Point3D>(nxx + 1));
-        vector<vector<Point3D>> bottom_control_points(nyy + 1, vector<Point3D>(nxx + 1));
-
-        // 初始化顶层控制点（增加网格尺寸变化和波浪形）
-        for (int j = 0; j <= nyy; ++j)
+        for (int j = 0; j < nyy; ++j)
         {
-            for (int i = 0; i <= nxx; ++i)
+            for (int i = 0; i < nxx; ++i)
             {
-                // 增加网格尺寸的不规则性：使用变化的基础间距
-                double x_base = i * (80.0 + 40.0 * sin(i * 0.5) * cos(j * 0.3)); // 80-120之间变化
-                double y_base = j * (75.0 + 30.0 * sin(i * 0.4) * cos(j * 0.5)); // 75-105之间变化
-
-                // 增加波浪形顶层，适度提高振幅
-                double amplitude_x = 25.0;
-                double amplitude_y = 20.0;
-                double amplitude_z = 35.0;
-
-                top_control_points[j][i].x = x_base +
-                                             amplitude_x * sin(i * 0.8) * cos(j * 0.5);
-                top_control_points[j][i].y = y_base +
-                                             amplitude_y * sin(i * 0.6) * cos(j * 0.7);
-                top_control_points[j][i].z = 70.0 +
-                                             amplitude_z * sin(i * 0.7) * sin(j * 0.6);
-            }
-        }
-        top_control_points[1][3].y -= 30.0;
-
-        // 初始化底层控制点（显著增加倾斜和扭曲）
-        for (int j = 0; j <= nyy; ++j)
-        {
-            for (int i = 0; i <= nxx; ++i)
-            {
-                // 底层网格尺寸变化与顶层对应但有所偏移
-                double x_base = i * (85.0 + 35.0 * sin(i * 0.6) * cos(j * 0.4));
-                double y_base = j * (80.0 + 25.0 * sin(i * 0.5) * cos(j * 0.6));
-
-                // 增加底层变形程度
-                double amplitude_x = 35.0;
-                double amplitude_y = 30.0;
-
-                bottom_control_points[j][i].x = x_base +
-                                                amplitude_x * sin(i * 1.0) * cos(j * 0.8);
-                bottom_control_points[j][i].y = y_base +
-                                                amplitude_y * sin(i * 0.8) * cos(j * 1.0);
-
-                // 显著增加底层深度变化和倾斜
-                double base_z = 400.0;
-
-                // 显著增加倾斜程度
-                double tilt_x = 50.0 * sin(i * 0.6);                                         // x方向倾斜增加到50
-                double tilt_y = 45.0 * (1.0 - j / (double)nyy) * (1.0 + 0.5 * sin(i * 0.4)); // y方向倾斜增加到45，且变化
-                double local_variation = 30.0 * sin(i * 0.7) * cos(j * 0.8);                 // 增加局部变化
-
-                // 添加轻微的断层模拟（非真实断层）
-                double offset_effect = 0.0;
-                if (i > nxx / 2)
-                {
-                    offset_effect = -20.0 * sin((i - nxx / 2) * 0.5); // 轻微偏移
-                }
-
-                bottom_control_points[j][i].z = base_z + tilt_x + tilt_y + local_variation + offset_effect;
-            }
-        }
-        bottom_control_points[1][3].y += 30.0;
-        bottom_control_points[0][3].y += 20.0;
-        bottom_control_points[3][3].y -= 20.0;
-        bottom_control_points[1][2].z += 25.0;
-        bottom_control_points[1][1].z += 25.0;
-        bottom_control_points[1][1].y += 25.0;
-        bottom_control_points[3][0].y += 25.0;
-        bottom_control_points[3][1].y += 25.0;
-        // 定义非线性层深度 (nzz+1层，从0到1)
-        vector<double> layer_depths(nzz + 1);
-
-        // 创建不均匀的层厚度分布，增加层间差异
-        for (int k = 0; k <= nzz; ++k)
-        {
-            double normalized = (double)k / nzz;
-
-            // 创建有明显厚度变化的层
-            if (k == 0)
-            {
-                layer_depths[k] = 0.0;
-            }
-            else if (k == nzz)
-            {
-                layer_depths[k] = 1.0;
-            }
-            else
-            {
-                // 使用函数创建不均匀的层厚度
-                double exp_factor = exp(1.5 * normalized - 0.75) / exp(0.75);
-                double sin_factor = 0.2 * sin(normalized * 4.0 * M_PI);
-
-                // 调整权重，增加非线性
-                layer_depths[k] = normalized * 0.4 + exp_factor * 0.5 + sin_factor * 0.1;
-            }
-        }
-
-        // 对层深度进行归一化
-        double min_depth = *min_element(layer_depths.begin(), layer_depths.end());
-        double max_depth = *max_element(layer_depths.begin(), layer_depths.end());
-        for (int k = 0; k <= nzz; ++k)
-        {
-            layer_depths[k] = (layer_depths[k] - min_depth) / (max_depth - min_depth);
-        }
-
-        // 添加随机扰动到层深度
-        srand(12345);
-        for (int k = 1; k < nzz; ++k)
-        {
-            double random_perturbation = 0.12 * ((double)rand() / RAND_MAX - 0.5);
-            layer_depths[k] += random_perturbation;
-        }
-
-        // 重新排序以确保单调递增
-        sort(layer_depths.begin(), layer_depths.end());
-
-        // 计算所有网格节点的坐标，添加全局扰动
-        for (int k = 0; k <= nzz; ++k)
-        {
-            for (int j = 0; j <= nyy; ++j)
-            {
-                for (int i = 0; i <= nxx; ++i)
-                {
-                    // 根据角点网格原理，每个节点都在连接顶层和底层对应点的直线上
-                    Point3D top_point = top_control_points[j][i];
-                    Point3D bottom_point = bottom_control_points[j][i];
-
-                    // 使用层深度比例进行插值
-                    double ratio = layer_depths[k];
-
-                    // 基本插值
-                    grid_nodes[k][j][i].x = top_point.x + (bottom_point.x - top_point.x) * ratio;
-                    grid_nodes[k][j][i].y = top_point.y + (bottom_point.y - top_point.y) * ratio;
-                    grid_nodes[k][j][i].z = top_point.z + (bottom_point.z - top_point.z) * ratio;
-
-                    // 添加全局扰动，增加不规则性但不破坏连续性
-                    double freq_x = 0.015;
-                    double freq_y = 0.013;
-                    double freq_z = 0.008;
-
-                    // 使用多层扰动叠加，但幅度适中
-                    double perturbation1 = 12.0 * sin(grid_nodes[k][j][i].x * freq_x) *
-                                           cos(grid_nodes[k][j][i].y * freq_y) *
-                                           sin(grid_nodes[k][j][i].z * freq_z);
-
-                    double perturbation2 = 8.0 * sin(grid_nodes[k][j][i].x * freq_x * 2.0) *
-                                           cos(grid_nodes[k][j][i].y * freq_y * 1.8) *
-                                           sin(grid_nodes[k][j][i].z * freq_z * 1.2);
-
-                    double total_perturbation = perturbation1 * 0.6 + perturbation2 * 0.4;
-
-                    // 为不同方向添加扰动
-                    grid_nodes[k][j][i].x += total_perturbation * 0.25;
-                    grid_nodes[k][j][i].y += total_perturbation * 0.18;
-                    grid_nodes[k][j][i].z += total_perturbation * 0.12;
-
-                    // 添加基于层高的扰动，使不同层有不同的扭曲
-                    double layer_perturbation = 10.0 * sin(ratio * 6.0) * cos(i * 0.4 + j * 0.3 + k * 0.5);
-                    grid_nodes[k][j][i].x += layer_perturbation * 0.15;
-                    grid_nodes[k][j][i].y += layer_perturbation * 0.1;
-                    grid_nodes[k][j][i].z += layer_perturbation * 0.05;
-                }
-            }
-        }
-
-        // 现在，基于这些节点计算每个网格的八个角点
-        for (int k = 0; k < nzz; ++k)
-        {
-            for (int j = 0; j < nyy; ++j)
-            {
-                for (int i = 0; i < nxx; ++i)
-                {
-                    // 获取当前网格的八个节点
-                    Point3D node000 = grid_nodes[k][j][i];         // 底部左下
-                    Point3D node100 = grid_nodes[k][j][i + 1];     // 底部右下
-                    Point3D node010 = grid_nodes[k][j + 1][i];     // 底部左上
-                    Point3D node110 = grid_nodes[k][j + 1][i + 1]; // 底部右上
-
-                    Point3D node001 = grid_nodes[k + 1][j][i];         // 顶部左下
-                    Point3D node101 = grid_nodes[k + 1][j][i + 1];     // 顶部右下
-                    Point3D node011 = grid_nodes[k + 1][j + 1][i];     // 顶部左上
-                    Point3D node111 = grid_nodes[k + 1][j + 1][i + 1]; // 顶部右上
-
-                    // 将节点坐标赋值给网格顶点
-                    // 底部四个角点
-                    verts(k, j, i, 0, 0) = node000.x;
-                    verts(k, j, i, 0, 1) = node000.y;
-                    verts(k, j, i, 0, 2) = node000.z;
-
-                    verts(k, j, i, 1, 0) = node100.x;
-                    verts(k, j, i, 1, 1) = node100.y;
-                    verts(k, j, i, 1, 2) = node100.z;
-
-                    verts(k, j, i, 2, 0) = node010.x;
-                    verts(k, j, i, 2, 1) = node010.y;
-                    verts(k, j, i, 2, 2) = node010.z;
-
-                    verts(k, j, i, 3, 0) = node110.x;
-                    verts(k, j, i, 3, 1) = node110.y;
-                    verts(k, j, i, 3, 2) = node110.z;
-
-                    // 顶部四个角点
-                    verts(k, j, i, 4, 0) = node001.x;
-                    verts(k, j, i, 4, 1) = node001.y;
-                    verts(k, j, i, 4, 2) = node001.z;
-
-                    verts(k, j, i, 5, 0) = node101.x;
-                    verts(k, j, i, 5, 1) = node101.y;
-                    verts(k, j, i, 5, 2) = node101.z;
-
-                    verts(k, j, i, 6, 0) = node011.x;
-                    verts(k, j, i, 6, 1) = node011.y;
-                    verts(k, j, i, 6, 2) = node011.z;
-
-                    verts(k, j, i, 7, 0) = node111.x;
-                    verts(k, j, i, 7, 1) = node111.y;
-                    verts(k, j, i, 7, 2) = node111.z;
-                }
+                verts(k, j, i, 0, 0) = i * DX;
+                verts(k, j, i, 0, 1) = j * DY;
+                verts(k, j, i, 0, 2) = k * DZ;
+                verts(k, j, i, 1, 0) = i * DX + DX;
+                verts(k, j, i, 1, 1) = j * DY;
+                verts(k, j, i, 1, 2) = k * DZ;
+                verts(k, j, i, 2, 0) = i * DX;
+                verts(k, j, i, 2, 1) = j * DY + DY;
+                verts(k, j, i, 2, 2) = k * DZ;
+                verts(k, j, i, 3, 0) = i * DX + DX;
+                verts(k, j, i, 3, 1) = j * DY + DY;
+                verts(k, j, i, 3, 2) = k * DZ;
+                verts(k, j, i, 4, 0) = i * DX;
+                verts(k, j, i, 4, 1) = j * DY;
+                verts(k, j, i, 4, 2) = k * DZ + DZ;
+                verts(k, j, i, 5, 0) = i * DX + DX;
+                verts(k, j, i, 5, 1) = j * DY;
+                verts(k, j, i, 5, 2) = k * DZ + DZ;
+                verts(k, j, i, 6, 0) = i * DX;
+                verts(k, j, i, 6, 1) = j * DY + DY;
+                verts(k, j, i, 6, 2) = k * DZ + DZ;
+                verts(k, j, i, 7, 0) = i * DX + DX;
+                verts(k, j, i, 7, 1) = j * DY + DY;
+                verts(k, j, i, 7, 2) = k * DZ + DZ;
             }
         }
     }
-
     for (int k = 0; k < nzz; k++)
     {
         for (int j = 0; j < nyy; j++)
@@ -738,6 +541,141 @@ void _get_3x3(double *_verts, Ktensor *pem, double pemx,
                     pem[i0].yz = pemyz * Lamda;
                     pem[i0].xz = pemxz * Lamda;
                 }
+            }
+        }
+    }
+}
+
+void _get_3x3(double *_verts, Ktensor *pem, int Lamda, double theta)
+{
+    using namespace std;
+    std::mdspan<double, std::extents<size_t, -1, -1, -1, 8, 3>> verts(_verts, nzz, nyy, nxx);
+
+    // 首先，定义网格尺寸
+    double M_PI = Pi;
+    double DX = 1.0;
+    double DY = 1.0;
+    double DZ = 1.0;
+    for (int k = 0; k < nzz; ++k) // �ѿ�������
+    {
+        for (int j = 0; j < nyy; ++j)
+        {
+            for (int i = 0; i < nxx; ++i)
+            {
+                verts(k, j, i, 0, 0) = i * DX;
+                verts(k, j, i, 0, 1) = j * DY;
+                verts(k, j, i, 0, 2) = k * DZ;
+                verts(k, j, i, 1, 0) = i * DX + DX;
+                verts(k, j, i, 1, 1) = j * DY;
+                verts(k, j, i, 1, 2) = k * DZ;
+                verts(k, j, i, 2, 0) = i * DX;
+                verts(k, j, i, 2, 1) = j * DY + DY;
+                verts(k, j, i, 2, 2) = k * DZ;
+                verts(k, j, i, 3, 0) = i * DX + DX;
+                verts(k, j, i, 3, 1) = j * DY + DY;
+                verts(k, j, i, 3, 2) = k * DZ;
+                verts(k, j, i, 4, 0) = i * DX;
+                verts(k, j, i, 4, 1) = j * DY;
+                verts(k, j, i, 4, 2) = k * DZ + DZ;
+                verts(k, j, i, 5, 0) = i * DX + DX;
+                verts(k, j, i, 5, 1) = j * DY;
+                verts(k, j, i, 5, 2) = k * DZ + DZ;
+                verts(k, j, i, 6, 0) = i * DX;
+                verts(k, j, i, 6, 1) = j * DY + DY;
+                verts(k, j, i, 6, 2) = k * DZ + DZ;
+                verts(k, j, i, 7, 0) = i * DX + DX;
+                verts(k, j, i, 7, 1) = j * DY + DY;
+                verts(k, j, i, 7, 2) = k * DZ + DZ;
+            }
+        }
+    }
+    for (int k = 0; k < nzz; k++)
+    {
+        for (int j = 0; j < nyy; j++)
+        {
+            for (int i = 0; i < nxx; i++)
+            {
+                int idx = i + j + k;
+                int i0 = 9 * k + 3 * j + i;
+                if (idx % 2 == 0)
+                {
+                    pem[i0].x = 1.0;
+                    pem[i0].y = 1.0;
+                    pem[i0].z = 1.0;
+                    pem[i0].xy = 0.5;
+                    pem[i0].yz = 0.5;
+                    pem[i0].xz = 0.5;
+                }
+                else
+                {
+                    pem[i0].x = 1.0 * Lamda;
+                    pem[i0].y = (1.0 + (std::sin(theta) * std::cos(theta))) * Lamda;
+                    pem[i0].z = (1.0 - (std::sin(theta) * std::cos(theta))) * Lamda;
+                    pem[i0].xy = 0.5 * (std::sin(theta) + std::cos(theta)) * Lamda;
+                    pem[i0].yz = 0.5 * std::cos(2.0 * theta) * Lamda;
+                    pem[i0].xz = 0.5 * (-std::sin(theta) + std::cos(theta)) * Lamda;
+                }
+            }
+        }
+    }
+}
+
+void _get_verts(double *_verts)
+{
+    std::mdspan<double, std::extents<size_t, -1, -1, -1, 8, 3>> verts(_verts, nzz, nyy, nxx);
+    double DX = 15.0;
+    double DY = 27.0;
+    double DZ = 10.0;
+    for (int k = 0; k < nzz; ++k) // �ѿ�������
+    {
+        for (int j = 0; j < nyy; ++j)
+        {
+            for (int i = 0; i < nxx; ++i)
+            {
+                verts(k, j, i, 0, 0) = i * DX;
+                verts(k, j, i, 0, 1) = j * DY;
+                verts(k, j, i, 0, 2) = k * DZ;
+                verts(k, j, i, 1, 0) = i * DX + DX;
+                verts(k, j, i, 1, 1) = j * DY;
+                verts(k, j, i, 1, 2) = k * DZ;
+                verts(k, j, i, 2, 0) = i * DX;
+                verts(k, j, i, 2, 1) = j * DY + DY;
+                verts(k, j, i, 2, 2) = k * DZ;
+                verts(k, j, i, 3, 0) = i * DX + DX;
+                verts(k, j, i, 3, 1) = j * DY + DY;
+                verts(k, j, i, 3, 2) = k * DZ;
+                verts(k, j, i, 4, 0) = i * DX;
+                verts(k, j, i, 4, 1) = j * DY;
+                verts(k, j, i, 4, 2) = k * DZ + DZ;
+                verts(k, j, i, 5, 0) = i * DX + DX;
+                verts(k, j, i, 5, 1) = j * DY;
+                verts(k, j, i, 5, 2) = k * DZ + DZ;
+                verts(k, j, i, 6, 0) = i * DX;
+                verts(k, j, i, 6, 1) = j * DY + DY;
+                verts(k, j, i, 6, 2) = k * DZ + DZ;
+                verts(k, j, i, 7, 0) = i * DX + DX;
+                verts(k, j, i, 7, 1) = j * DY + DY;
+                verts(k, j, i, 7, 2) = k * DZ + DZ;
+            }
+        }
+    }
+}
+
+void _get_pem(Ktensor *pem, const double *kc, const double *kd)
+{
+    for (int k = 0; k < nzz; k++)
+    {
+        for (int j = 0; j < nyy; j++)
+        {
+            for (int i = 0; i < nxx; i++)
+            {
+                int i0 = nxx * nyy * k + nxx * j + i;
+                pem[i0].x = 20;
+                pem[i0].y = 100;
+                pem[i0].z = 10;
+                pem[i0].xy = 10;
+                pem[i0].yz = 0;
+                pem[i0].xz = 0;
             }
         }
     }

@@ -17,6 +17,6 @@ target_link_libraries(Tensor_MPFA PRIVATE
 )
 if (MSVC)
   set_source_files_properties(TEST.cpp PROPERTIES
-    COMPILE_OPTIONS "$<$<CONFIG:Release>:/GL->;$<$<CONFIG:Release>:/O2>;$<$<CONFIG:Release>:/Ob0>"
+    COMPILE_OPTIONS "$<$<CONFIG:Release>:/O2>;$<$<CONFIG:Release>:/Ob0>"
   )
 endif()
