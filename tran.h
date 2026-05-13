@@ -7307,25 +7307,254 @@ void MPFA(int i, int j, int k, const enum Axis axi)
     }
 }
 
+// axis: 0 for x, 1 for y, 2 for z
 void TPFA(int i, int j, int k, int axis)
 {
-    int cur = k * nx * ny + j * nx + i;
+    // N1 and N2 are the indices of the two neighboring cells along the specified axis. t and p are the normal vectors and centroids of the  interface between the two cells, respectively.
+    int cur = k * nx * ny + j * nx + i, N1 = 0, N2 = 0;
+    double t[3]{};
+    double p[3]{};
+    double lamda = 0, lamda1 = 0, lamda2 = 0;
+    Eigen::RowVector3d c1, c2, nT;
+    Eigen::Matrix3d matK1, matK2;
     if (axis == 0)
     {
-        if ()
-
-        // To be implemented
+        if (j > 0 & j < ny && k > 0)
+        {
+            N1 = (k - 1) * nx * ny + (j - 1) * nx + i;
+            N2 = (k - 1) * nx * ny + j * nx + i;
+            _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 1, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), p);
+            _get_triangle_normal(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 5, 0), p, t, Axis::YPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k - 1, j - 1, i), p[1] - _cy(k - 1, j - 1, i), p[2] - _cz(k - 1, j - 1, i);
+            c2 << _cx(k - 1, j, i) - p[0], _cy(k - 1, j, i) - p[1], _cz(k - 1, j, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
+        if (j > 0 & j < ny && k < nz)
+        {
+            N1 = k * nx * ny + (j - 1) * nx + i;
+            N2 = k * nx * ny + j * nx + i;
+            _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 5, 0), p);
+            _get_triangle_normal(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), p, t, Axis::YPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k, j - 1, i), p[1] - _cy(k, j - 1, i), p[2] - _cz(k, j - 1, i);
+            c2 << _cx(k, j, i) - p[0], _cy(k, j, i) - p[1], _cz(k, j, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
+        if (k > 0 && k < nz && j > 0)
+        {
+            N1 = (k - 1) * nx * ny + (j - 1) * nx + i;
+            N2 = k * nx * ny + (j - 1) * nx + i;
+            _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 1, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), p);
+            _get_triangle_normal(&verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 3, 0), p, t, Axis::ZPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k - 1, j - 1, i), p[1] - _cy(k - 1, j - 1, i), p[2] - _cz(k - 1, j - 1, i);
+            c2 << _cx(k, j - 1, i) - p[0], _cy(k, j - 1, i) - p[1], _cz(k, j - 1, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
+        if (k > 0 && k < nz && j < ny)
+        {
+            N1 = (k - 1) * nx * ny + j * nx + i;
+            N2 = k * nx * ny + j * nx + i;
+            _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 3, 0), p);
+            _get_triangle_normal(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), p, t, Axis::ZPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k - 1, j, i), p[1] - _cy(k - 1, j, i), p[2] - _cz(k - 1, j, i);
+            c2 << _cx(k, j, i) - p[0], _cy(k, j, i) - p[1], _cz(k, j, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
     }
     else if (axis == 1)
     {
-        // To be implemented
+        if (i > 0 && i < nx && k > 0)
+        {
+            N1 = (k - 1) * nx * ny + j * nx + i - 1;
+            N2 = (k - 1) * nx * ny + j * nx + i;
+            _get_centroid(&verts1(k - 1, j, i, 0, 0), &verts1(k - 1, j, i, 2, 0), &verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), p);
+            _get_triangle_normal(&verts1(k - 1, j, i, 4, 0), &verts1(k - 1, j, i, 6, 0), p, t, Axis::XPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k - 1, j, i - 1), p[1] - _cy(k - 1, j, i - 1), p[2] - _cz(k - 1, j, i - 1);
+            c2 << _cx(k - 1, j, i) - p[0], _cy(k - 1, j, i) - p[1], _cz(k - 1, j, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
+        if (i > 0 && i < nx && k < nz)
+        {
+            N1 = k * nx * ny + j * nx + i - 1;
+            N2 = k * nx * ny + j * nx + i;
+            _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 6, 0), p);
+            _get_triangle_normal(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), p, t, Axis::XPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k, j, i - 1), p[1] - _cy(k, j, i - 1), p[2] - _cz(k, j, i - 1);
+            c2 << _cx(k, j, i) - p[0], _cy(k, j, i) - p[1], _cz(k, j, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
+        if (k > 0 && k < nz && i > 0)
+        {
+            N1 = (k - 1) * nx * ny + j * nx + i - 1;
+            N2 = k * nx * ny + j * nx + i - 1;
+            _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 2, 0), &verts1(k, j, i - 1, 3, 0), p);
+            _get_triangle_normal(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 3, 0), p, t, Axis::ZPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k - 1, j, i - 1), p[1] - _cy(k - 1, j, i - 1), p[2] - _cz(k - 1, j, i - 1);
+            c2 << _cx(k, j, i - 1) - p[0], _cy(k, j, i - 1) - p[1], _cz(k, j, i - 1) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
+        if (k > 0 && k < nz && i < nx)
+        {
+            N1 = (k - 1) * nx * ny + j * nx + i;
+            N2 = k * nx * ny + j * nx + i;
+            _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 3, 0), p);
+            _get_triangle_normal(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), p, t, Axis::ZPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k - 1, j, i), p[1] - _cy(k - 1, j, i), p[2] - _cz(k - 1, j, i);
+            c2 << _cx(k, j, i) - p[0], _cy(k, j, i) - p[1], _cz(k, j, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
     }
     else
     {
-        // To be implemented
+        if (i > 0 && i < nx && j > 0)
+        {
+            N1 = k * nx * ny + (j - 1) * nx + i - 1;
+            N2 = k * nx * ny + (j - 1) * nx + i;
+            _get_centroid(&verts1(k, j - 1, i, 0, 0), &verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 4, 0), &verts1(k, j - 1, i, 6, 0), p);
+            _get_triangle_normal(&verts1(k, j - 1, i, 2, 0), &verts1(k, j - 1, i, 6, 0), p, t, Axis::XPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k, j - 1, i - 1), p[1] - _cy(k, j - 1, i - 1), p[2] - _cz(k, j - 1, i - 1);
+            c2 << _cx(k, j - 1, i) - p[0], _cy(k, j - 1, i) - p[1], _cz(k, j - 1, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
+        if (i > 0 && i < nx && j < ny)
+        {
+            N1 = k * nx * ny + j * nx + i - 1;
+            N2 = k * nx * ny + j * nx + i;
+            _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 6, 0), p);
+            _get_triangle_normal(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 4, 0), p, t, Axis::XPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k, j, i - 1), p[1] - _cy(k, j, i - 1), p[2] - _cz(k, j, i - 1);
+            c2 << _cx(k, j, i) - p[0], _cy(k, j, i) - p[1], _cz(k, j, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
+        if (j > 0 && j < ny && i > 0)
+        {
+            N1 = k * nx * ny + (j - 1) * nx + i - 1;
+            N2 = k * nx * ny + j * nx + i - 1;
+            _get_centroid(&verts1(k, j, i - 1, 0, 0), &verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 4, 0), &verts1(k, j, i - 1, 5, 0), p);
+            _get_triangle_normal(&verts1(k, j, i - 1, 1, 0), &verts1(k, j, i - 1, 5, 0), p, t, Axis::YPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k, j - 1, i - 1), p[1] - _cy(k, j - 1, i - 1), p[2] - _cz(k, j - 1, i - 1);
+            c2 << _cx(k, j, i - 1) - p[0], _cy(k, j, i - 1) - p[1], _cz(k, j, i - 1) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
+        if (j > 0 && j < ny && i < nx)
+        {
+            N1 = k * nx * ny + (j - 1) * nx + i;
+            N2 = k * nx * ny + j * nx + i;
+            _get_centroid(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0), &verts1(k, j, i, 4, 0), &verts1(k, j, i, 5, 0), p);
+            _get_triangle_normal(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 4, 0), p, t, Axis::YPOSITIVE);
+            _get_matK(pem1[N1], matK1);
+            _get_matK(pem1[N2], matK2);
+            c1 << p[0] - _cx(k, j - 1, i), p[1] - _cy(k, j - 1, i), p[2] - _cz(k, j - 1, i);
+            c2 << _cx(k, j, i) - p[0], _cy(k, j, i) - p[1], _cz(k, j, i) - p[2];
+            nT << t[0], t[1], t[2];
+            lamda1 = (nT * matK1).dot(c1) / c1.squaredNorm();
+            lamda2 = (nT * matK2).dot(c2) / c2.squaredNorm();
+            lamda = lamda1 * lamda2 / (lamda1 + lamda2);
+            C(N1, N1) -= lamda;
+            C(N1, N2) += lamda;
+            C(N2, N1) += lamda;
+            C(N2, N2) -= lamda;
+        }
     }
 }
-
 void FAM(int *idx, const double lz, const double *l, const double *r, const double *angle, const Eigen::Matrix2d *K, double &alpha, const double *r_p, const double *angle_p)
 {
     std::complex<double> c[4];

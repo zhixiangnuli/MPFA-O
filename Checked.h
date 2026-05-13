@@ -29,7 +29,7 @@ constexpr double Plow = 0.0, Phigh = 1.0;
 constexpr double epsilonP = 1.0e-6, residual = 0.0001;
 // constexpr double pem0 = 300.0;
 // constexpr double tolpem = pem0 + 1.0;
-constexpr int nxx = 50, nyy = 30, nzz = 1; // ϸ��ǰ
+constexpr int nxx = 50, nyy = 30, nzz = 2; // ϸ��ǰ
 // constexpr int nxx = 10, nyy = 9, nzz = 8;                          //ϸ��ǰ
 int nx, ny, nz;
 struct Ktensor;
