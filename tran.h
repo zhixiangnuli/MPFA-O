@@ -7307,6 +7307,25 @@ void MPFA(int i, int j, int k, const enum Axis axi)
     }
 }
 
+void TPFA(int i, int j, int k, int axis)
+{
+    int cur = k * nx * ny + j * nx + i;
+    if (axis == 0)
+    {
+        if ()
+
+        // To be implemented
+    }
+    else if (axis == 1)
+    {
+        // To be implemented
+    }
+    else
+    {
+        // To be implemented
+    }
+}
+
 void FAM(int *idx, const double lz, const double *l, const double *r, const double *angle, const Eigen::Matrix2d *K, double &alpha, const double *r_p, const double *angle_p)
 {
     std::complex<double> c[4];
@@ -7578,8 +7597,9 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
             for (int i = 0; i <= nx; i++)
                 if (i == 0 || i == nx || k == 0 || k == nz || _MPFA_ONLY)
                 {
-                    MPFA(i, j, k, Axis::YPOSITIVE);
-                    MPFA(i, j + 1, k, Axis::YNEGATIVE);
+                    // MPFA(i, j, k, Axis::YPOSITIVE);
+                    // MPFA(i, j + 1, k, Axis::YNEGATIVE);
+                    TPFA(i, j, k, 1);
                 }
                 else
                 {
@@ -7659,8 +7679,9 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     FAM(idx, _get_distance(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 2, 0)), l, r, angle, K, alpha, r_p, angle_p);
                     if (alpha == 0.0 || alpha > 0.99)
                     {
-                        MPFA(i, j, k, Axis::YPOSITIVE);
-                        MPFA(i, j + 1, k, Axis::YNEGATIVE);
+                        // MPFA(i, j, k, Axis::YPOSITIVE);
+                        // MPFA(i, j + 1, k, Axis::YNEGATIVE);
+                        TPFA(i, j, k, 1);
                     }
                 }
     for (int k = 0; k <= nz; k++)
@@ -7668,8 +7689,9 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
             for (int i = 0; i < nx; i++)
                 if (j == 0 || j == ny || k == 0 || k == nz || _MPFA_ONLY)
                 {
-                    MPFA(i, j, k, Axis::XPOSITIVE);
-                    MPFA(i + 1, j, k, Axis::XNEGATIVE);
+                    // MPFA(i, j, k, Axis::XPOSITIVE);
+                    // MPFA(i + 1, j, k, Axis::XNEGATIVE);
+                    TPFA(i, j, k, 0);
                 }
                 else
                 {
@@ -7743,8 +7765,9 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     FAM(idx, _get_distance(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 1, 0)), l, r, angle, K, alpha, r_p, angle_p);
                     if (alpha == 0.0 || alpha > 0.99)
                     {
-                        MPFA(i, j, k, Axis::XPOSITIVE);
-                        MPFA(i + 1, j, k, Axis::XNEGATIVE);
+                        // MPFA(i, j, k, Axis::XPOSITIVE);
+                        // MPFA(i + 1, j, k, Axis::XNEGATIVE);
+                        TPFA(i, j, k, 0);
                     }
                 }
     for (int k = 0; k < nz; k++)
@@ -7752,8 +7775,9 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
             for (int i = 0; i <= nx; i++)
                 if (j == 0 || j == ny || i == 0 || i == nx || _MPFA_ONLY)
                 {
-                    MPFA(i, j, k, Axis::ZPOSITIVE);
-                    MPFA(i, j, k + 1, Axis::ZNEGATIVE);
+                    // MPFA(i, j, k, Axis::ZPOSITIVE);
+                    // MPFA(i, j, k + 1, Axis::ZNEGATIVE);
+                    TPFA(i, j, k, 2);
                 }
                 else
                 {
@@ -7827,8 +7851,9 @@ void _get_Qx(const Ktensor *perm, const double *verts, int divn, int &Iter, doub
                     FAM(idx, _get_distance(&verts1(k, j, i, 0, 0), &verts1(k, j, i, 4, 0)), l, r, angle, K, alpha, r_p, angle_p);
                     if (alpha == 0.0 || alpha > 0.99)
                     {
-                        MPFA(i, j, k, Axis::ZPOSITIVE);
-                        MPFA(i, j, k + 1, Axis::ZNEGATIVE);
+                        // MPFA(i, j, k, Axis::ZPOSITIVE);
+                        // MPFA(i, j, k + 1, Axis::ZNEGATIVE);
+                        TPFA(i, j, k, 2);
                     }
                 }
     pmgmres_ilu_cr(nx * ny * nz, nnz, Ptr, Idx, Val, p, B, 1000, 1000, 1e-5, 1e-5);
