@@ -23,13 +23,13 @@ namespace std
     using std::experimental::extents;
     using std::experimental::mdspan;
 }
-
+constexpr double Darcy_field = 0.00112712;
 constexpr double Pi = 3.141592653589793;
 constexpr double Plow = 0.0, Phigh = 1.0;
 constexpr double epsilonP = 1.0e-6, residual = 0.0001;
 // constexpr double pem0 = 300.0;
 // constexpr double tolpem = pem0 + 1.0;
-constexpr int nxx = 50, nyy = 30, nzz = 2; // ϸ��ǰ
+constexpr int nxx = 50, nyy = 30, nzz = 1; // ϸ��ǰ
 // constexpr int nxx = 10, nyy = 9, nzz = 8;                          //ϸ��ǰ
 int nx, ny, nz;
 struct Ktensor;
@@ -673,9 +673,18 @@ void _get_pem(Ktensor *pem, const double *kc, const double *kd)
                 pem[i0].x = 20;
                 pem[i0].y = 100;
                 pem[i0].z = 10;
-                pem[i0].xy = 10;
+                pem[i0].xy = 0;
                 pem[i0].yz = 0;
                 pem[i0].xz = 0;
+                if (i0 % 2 == j % 2)
+                {
+                    pem[i0].x *= 100;
+                    pem[i0].y *= 100;
+                    pem[i0].z *= 100;
+                    pem[i0].xy *= 100;
+                    pem[i0].yz *= 100;
+                    pem[i0].xz *= 100;
+                }
             }
         }
     }
